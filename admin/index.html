@@ -20,6 +20,8 @@
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
+  <header class="site-header" data-include="../partials/nav.html"></header>
+
   <main class="admin-main">
     <h1>Photo Admin</h1>
 
@@ -46,10 +48,15 @@
       <p id="status-log" class="admin-status"></p>
 
       <p class="section-sub">Drag photos to reorder them. This grid matches the live collage layout &mdash; use the size dropdown on each photo to change its tile shape.</p>
-      <div id="photo-grid" class="admin-photo-grid"></div>
+      <div id="admin-photo-grid" class="admin-photo-grid"></div>
     </section>
   </main>
 
+  <footer class="site-footer" data-include="../partials/footer.html"></footer>
+
+  <script src="../js/include.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/main.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

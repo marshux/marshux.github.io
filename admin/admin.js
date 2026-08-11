@@ -1,7 +1,6 @@
-const WORKER_URL = "https://marshux-cms-oauth.marshalx08.workers.dev";
-const GITHUB_REPO = "marshux/marshux.github.io";
+const WORKER_URL = MarshuxAuth.WORKER_URL;
+const GITHUB_REPO = MarshuxAuth.GITHUB_REPO;
 const PHOTOS_PATH = "data/photos.json";
-const TOKEN_KEY = "marshux_admin_gh_token";
 
 const loginView = document.getElementById("login-view");
 const managerView = document.getElementById("manager-view");
@@ -12,9 +11,9 @@ const publishBtn = document.getElementById("publish-btn");
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("file-input");
 const statusLog = document.getElementById("status-log");
-const photoGrid = document.getElementById("photo-grid");
+const photoGrid = document.getElementById("admin-photo-grid");
 
-let token = sessionStorage.getItem(TOKEN_KEY) || null;
+let token = MarshuxAuth.getToken();
 let photos = [];
 let fileSha = null;
 let dirty = false;
@@ -206,42 +205,6 @@ photoGrid.addEventListener("drop", (e) => {
   e.preventDefault();
 });
 
-function loginWithGithub() {
-  return new Promise((resolve, reject) => {
-    const popup = window.open(`${WORKER_URL}/auth`, "github-oauth", "width=600,height=700");
-    if (!popup) {
-      reject(new Error("Popup was blocked. Allow popups for this site and try again."));
-      return;
-    }
-
-    function handleMessage(e) {
-      if (e.data === "authorizing:github") {
-        popup.postMessage("authorizing:github", "*");
-        return;
-      }
-      if (typeof e.data !== "string") return;
-      if (e.data.startsWith("authorization:github:success:")) {
-        window.removeEventListener("message", handleMessage);
-        const payload = JSON.parse(e.data.replace("authorization:github:success:", ""));
-        resolve(payload.token);
-      } else if (e.data.startsWith("authorization:github:error:")) {
-        window.removeEventListener("message", handleMessage);
-        reject(new Error("GitHub authorization failed."));
-      }
-    }
-    window.addEventListener("message", handleMessage);
-  });
-}
-
-async function hasPushAccess() {
-  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
-    headers: githubHeaders(),
-  });
-  if (!res.ok) return false;
-  const data = await res.json();
-  return Boolean(data.permissions && data.permissions.push);
-}
-
 async function loadPhotos() {
   const res = await fetch(
     `https://api.github.com/repos/${GITHUB_REPO}/contents/${PHOTOS_PATH}`,
@@ -271,10 +234,10 @@ async function init() {
   if (!token) return;
   setStatus("");
   loginStatus.textContent = "Checking access…";
-  const authorized = await hasPushAccess();
+  const authorized = await MarshuxAuth.hasPushAccess(token);
   if (!authorized) {
     loginStatus.textContent = "That GitHub account doesn't have push access to this repo.";
-    sessionStorage.removeItem(TOKEN_KEY);
+    MarshuxAuth.clearToken();
     token = null;
     return;
   }
@@ -284,22 +247,25 @@ async function init() {
 loginBtn.addEventListener("click", async () => {
   loginStatus.textContent = "";
   try {
-    token = await loginWithGithub();
-    sessionStorage.setItem(TOKEN_KEY, token);
+    token = await MarshuxAuth.login();
+    MarshuxAuth.setToken(token);
     await init();
   } catch (err) {
     loginStatus.textContent = err.message;
+  } finally {
+    if (window.MarshuxAuthNav) window.MarshuxAuthNav.refresh();
   }
 });
 
 logoutBtn.addEventListener("click", () => {
-  sessionStorage.removeItem(TOKEN_KEY);
+  MarshuxAuth.clearToken();
   token = null;
   photos = [];
   fileSha = null;
   dirty = false;
   managerView.hidden = true;
   loginView.hidden = false;
+  if (window.MarshuxAuthNav) window.MarshuxAuthNav.refresh();
 });
 
 async function uploadOne(file) {

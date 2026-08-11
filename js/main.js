@@ -7,15 +7,53 @@ document.addEventListener("includes:loaded", () => {
   if (yearEl) yearEl.textContent = new Date().getFullYear();
   highlightActiveNavLink();
   initThemeToggle();
+  initAuthNav();
 });
 
 function highlightActiveNavLink() {
-  const current = location.pathname.split("/").pop() || "index.html";
+  let current = location.pathname.split("/").pop() || "index.html";
+  if (location.pathname.startsWith("/admin")) {
+    current = "admin";
+  }
   document.querySelectorAll(".nav-links a[data-page]").forEach((link) => {
     if (link.getAttribute("data-page") === current) {
       link.classList.add("active");
     }
   });
+}
+
+function initAuthNav() {
+  const adminLink = document.getElementById("nav-admin-link");
+  const loginLink = document.getElementById("nav-login-link");
+  if (!adminLink || !loginLink || typeof MarshuxAuth === "undefined") return;
+
+  async function refresh() {
+    const isAdmin = await MarshuxAuth.checkAdmin();
+    adminLink.hidden = !isAdmin;
+    loginLink.textContent = isAdmin ? "Logout" : "Login";
+  }
+
+  loginLink.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (loginLink.textContent === "Logout") {
+      MarshuxAuth.clearToken();
+      await refresh();
+      return;
+    }
+    const original = loginLink.textContent;
+    loginLink.textContent = "Logging in…";
+    try {
+      const token = await MarshuxAuth.login();
+      MarshuxAuth.setToken(token);
+    } catch (err) {
+      loginLink.textContent = original;
+      return;
+    }
+    await refresh();
+  });
+
+  window.MarshuxAuthNav = { refresh };
+  refresh();
 }
 
 const THEME_KEY = "marshux-theme";
