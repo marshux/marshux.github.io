@@ -224,22 +224,23 @@ async function handleFiles(fileList) {
     return el;
   });
 
-  await Promise.all(
-    files.map(async (file, i) => {
-      try {
-        const url = await uploadOne(file);
-        photos.unshift({ image: url, alt: "" });
-        markDirty();
-      } catch (err) {
-        placeholders[i].textContent = `${file.name}: ${err.message}`;
-        return;
-      } finally {
-        placeholders[i].remove();
-      }
-      render();
-    })
-  );
+  const results = await Promise.allSettled(files.map((file) => uploadOne(file)));
+
+  const errors = [];
+  results.forEach((result, i) => {
+    placeholders[i].remove();
+    if (result.status === "fulfilled") {
+      photos.unshift({ image: result.value, alt: "" });
+    } else {
+      errors.push(`${files[i].name}: ${result.reason.message}`);
+    }
+  });
+
+  if (results.some((r) => r.status === "fulfilled")) {
+    markDirty();
+  }
   render();
+  setStatus(errors.length ? errors.join(" | ") : "");
 }
 
 fileInput.addEventListener("change", (e) => handleFiles(e.target.files));
