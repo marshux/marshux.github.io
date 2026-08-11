@@ -6,6 +6,7 @@ document.addEventListener("includes:loaded", () => {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
   highlightActiveNavLink();
+  initThemeToggle();
 });
 
 function highlightActiveNavLink() {
@@ -14,6 +15,24 @@ function highlightActiveNavLink() {
     if (link.getAttribute("data-page") === current) {
       link.classList.add("active");
     }
+  });
+}
+
+const THEME_KEY = "marshux-theme";
+
+function currentTheme() {
+  const explicit = document.documentElement.getAttribute("data-theme");
+  if (explicit) return explicit;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function initThemeToggle() {
+  const toggle = document.getElementById("theme-toggle");
+  if (!toggle) return;
+  toggle.addEventListener("click", () => {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem(THEME_KEY, next);
   });
 }
 

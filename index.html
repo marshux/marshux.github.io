@@ -6,6 +6,17 @@
   <title>Marshal Xu</title>
   <meta name="description" content="Marshal Xu &mdash; software engineer, builder, photographer." />
   <link rel="icon" href="https://github.com/marshux.png" />
+  <script>
+    (function () {
+      var stored = localStorage.getItem("marshux-theme");
+      if (stored === "light" || stored === "dark") {
+        document.documentElement.setAttribute("data-theme", stored);
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
