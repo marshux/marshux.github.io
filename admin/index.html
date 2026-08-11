@@ -1,11 +1,43 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
-  <title>Content Manager &mdash; marshux.github.io</title>
+  <title>Photo Admin &mdash; marshux.github.io</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+  <main class="admin-main">
+    <h1>Photo Admin</h1>
+
+    <section id="login-view">
+      <p class="section-sub">Log in with a GitHub account that has push access to this repo.</p>
+      <button id="login-btn" class="btn">Login with GitHub</button>
+      <p id="login-status" class="admin-status"></p>
+    </section>
+
+    <section id="manager-view" hidden>
+      <div class="admin-toolbar">
+        <button id="logout-btn" class="btn btn-secondary">Log out</button>
+        <button id="publish-btn" class="btn" disabled>Publish changes</button>
+      </div>
+
+      <div id="dropzone" class="dropzone">
+        <p>Drag &amp; drop photos here, or</p>
+        <label class="btn btn-secondary">
+          Choose files
+          <input id="file-input" type="file" accept="image/*" multiple hidden />
+        </label>
+      </div>
+
+      <p id="status-log" class="admin-status"></p>
+
+      <div id="photo-grid" class="admin-photo-grid"></div>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
 </body>
 </html>
