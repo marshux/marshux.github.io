@@ -60,24 +60,48 @@ function markDirty() {
   publishBtn.disabled = false;
 }
 
+const SIZE_LABELS = { "": "Small", wide: "Wide", tall: "Tall", big: "Big" };
+
 function render() {
   photoGrid.innerHTML = photos
-    .map(
-      (p, i) => `
-    <div class="admin-photo-card" draggable="true" data-index="${i}">
+    .map((p, i) => {
+      const size = p.size && p.size !== "small" ? p.size : "";
+      const sizeClass = size ? `size-${size}` : "";
+      const options = Object.entries(SIZE_LABELS)
+        .map(([value, label]) => `<option value="${value}" ${value === size ? "selected" : ""}>${label}</option>`)
+        .join("");
+      return `
+    <div class="admin-photo-card ${sizeClass}" draggable="true" data-index="${i}">
       <img src="${escapeHtml(p.image)}" alt="" loading="lazy" />
       <div class="card-body">
         <input type="text" value="${escapeHtml(p.alt || "")}" placeholder="Caption" data-index="${i}" class="caption-input" />
-        <button class="delete-btn" data-index="${i}" title="Delete">&times;</button>
+        <div class="card-body-row">
+          <select class="size-select" data-index="${i}" title="Tile size">${options}</select>
+          <button class="delete-btn" data-index="${i}" title="Delete">&times;</button>
+        </div>
       </div>
-    </div>`
-    )
+    </div>`;
+    })
     .join("");
 
   photoGrid.querySelectorAll(".caption-input").forEach((input) => {
     input.addEventListener("input", (e) => {
       photos[Number(e.target.dataset.index)].alt = e.target.value;
       markDirty();
+    });
+  });
+
+  photoGrid.querySelectorAll(".size-select").forEach((select) => {
+    select.addEventListener("change", (e) => {
+      const idx = Number(e.target.dataset.index);
+      const value = e.target.value;
+      if (value) {
+        photos[idx].size = value;
+      } else {
+        delete photos[idx].size;
+      }
+      markDirty();
+      render();
     });
   });
 

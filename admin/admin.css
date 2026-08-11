@@ -61,8 +61,9 @@
 
 .admin-photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  grid-auto-rows: 220px;
+  gap: 12px;
   margin-top: 24px;
 }
 
@@ -76,6 +77,19 @@
   cursor: grab;
 }
 
+.admin-photo-card.size-wide {
+  grid-column: span 2;
+}
+
+.admin-photo-card.size-tall {
+  grid-row: span 2;
+}
+
+.admin-photo-card.size-big {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
 .admin-photo-card.dragging {
   opacity: 0.4;
 }
@@ -86,20 +100,29 @@
 }
 
 .admin-photo-card img {
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 160px;
   object-fit: cover;
   display: block;
 }
 
 .admin-photo-card .card-body {
-  padding: 10px;
+  flex: 0 0 auto;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-photo-card .card-body-row {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .admin-photo-card input[type="text"] {
-  flex: 1;
+  width: 100%;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -108,7 +131,19 @@
   font-size: 0.85rem;
 }
 
+.admin-photo-card select {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg);
+  padding: 6px 8px;
+  font-size: 0.8rem;
+}
+
 .admin-photo-card .delete-btn {
+  flex: 0 0 auto;
   background: none;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -126,7 +161,7 @@
 .admin-photo-card.uploading {
   align-items: center;
   justify-content: center;
-  min-height: 160px;
+  min-height: 220px;
   color: var(--fg-muted);
   font-size: 0.85rem;
   text-align: center;

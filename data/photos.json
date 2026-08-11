@@ -2,7 +2,8 @@
   "photos": [
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487129/kutzudpusq50eku9rtpz.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "big"
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487129/huw83kd3e713t8bjrrlx.jpg",
@@ -10,7 +11,8 @@
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487129/tsnakozzgoptwvtjzdpz.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "wide"
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487129/nuxdm7mipvr5erpqfuly.jpg",
@@ -22,7 +24,8 @@
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487128/lsroz3p8ke2fn2kyfp2j.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "tall"
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487128/vmidbbzwsivnu6lsibac.jpg",
@@ -30,7 +33,8 @@
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487128/zvhpbr75pqeedmij7imu.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "wide"
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487128/lu5kz3q8xgvl39jyhwgm.jpg",
@@ -38,11 +42,13 @@
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487128/l7kqjge7ronb3xbp4qbu.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "tall"
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487127/a0x5zmokjaztyzmcnqvd.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "big"
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487127/ch5p1lkqxzpra1bmwjzh.jpg",
@@ -50,7 +56,8 @@
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487127/q28vcpp5pubk2e8taeys.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "wide"
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487127/smd5i5latwcbveedbje5.jpg",
@@ -62,7 +69,8 @@
     },
     {
       "image": "https://res.cloudinary.com/hf0tmghh/image/upload/v1786487127/bwkfmimi6nk0vxe7knxv.jpg",
-      "alt": ""
+      "alt": "",
+      "size": "tall"
     }
   ]
 }
