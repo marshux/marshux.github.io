@@ -92,7 +92,7 @@ export default {
       const cookieState = (cookieHeader.match(/oauth_state=([^;]+)/) || [])[1];
 
       if (!code || !state || state !== cookieState) {
-        return html("<p>Auth failed: invalid or missing state.</p>");
+        return html('<p>Auth failed: invalid or missing state.</p><p><a href="#" onclick="window.close();return false;">Close window</a></p>');
       }
 
       const tokenRes = await fetch(GITHUB_TOKEN_URL, {
@@ -112,7 +112,9 @@ export default {
       const tokenData = await tokenRes.json();
 
       if (!tokenData.access_token) {
-        return html(`<p>Auth failed: ${tokenData.error_description || "no token returned"}.</p>`);
+        return html(
+          `<p>Auth failed: ${tokenData.error_description || "no token returned"}.</p><p><a href="#" onclick="window.close();return false;">Close window</a></p>`
+        );
       }
 
       const message = `authorization:github:success:${JSON.stringify({
@@ -125,6 +127,7 @@ export default {
           function receiveMessage(e) {
             window.opener.postMessage(${JSON.stringify(message)}, e.origin);
             window.removeEventListener("message", receiveMessage, false);
+            window.close();
           }
           window.addEventListener("message", receiveMessage, false);
           window.opener.postMessage("authorizing:github", "*");
