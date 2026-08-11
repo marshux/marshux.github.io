@@ -2,10 +2,6 @@ const GITHUB_USER = "marshux";
 // Repos to hide from the Projects grid (profile config repos, this site itself, etc.)
 const HIDDEN_REPOS = new Set([GITHUB_USER, `${GITHUB_USER}.github.io`]);
 
-// TODO: set this to your Cloudinary cloud name after signing up at https://cloudinary.com
-// (Dashboard -> shows "Cloud name" near the top). See PHOTOS.md for the full setup.
-const CLOUDINARY_CLOUD_NAME = "your-cloud-name";
-
 document.addEventListener("includes:loaded", () => {
   const yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -21,8 +17,11 @@ function highlightActiveNavLink() {
   });
 }
 
-function cloudinaryUrl(publicId, transform = "f_auto,q_auto,w_900") {
-  return `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${transform}/${publicId}`;
+// Decap CMS stores the full Cloudinary delivery URL it gets back from the
+// media library widget. Inject auto format/quality so we don't have to
+// think about per-photo compression.
+function withAutoOptimize(cloudinaryUrl) {
+  return cloudinaryUrl.replace("/image/upload/", "/image/upload/f_auto,q_auto/");
 }
 
 function escapeHtml(str) {
@@ -73,9 +72,10 @@ async function loadPhotos() {
   try {
     const res = await fetch("data/photos.json");
     if (!res.ok) throw new Error("no manifest");
-    const photos = await res.json();
+    const data = await res.json();
+    const photos = Array.isArray(data.photos) ? data.photos : [];
 
-    if (!Array.isArray(photos) || photos.length === 0) {
+    if (photos.length === 0) {
       grid.innerHTML = `<p class="empty-state">Photography board coming soon.</p>`;
       return;
     }
@@ -83,7 +83,7 @@ async function loadPhotos() {
     grid.innerHTML = photos
       .map(
         (p) =>
-          `<img src="${cloudinaryUrl(p.publicId)}" alt="${escapeHtml(p.alt || "")}" loading="lazy" />`
+          `<img src="${withAutoOptimize(p.image)}" alt="${escapeHtml(p.alt || "")}" loading="lazy" />`
       )
       .join("");
   } catch (err) {

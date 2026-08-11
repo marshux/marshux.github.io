@@ -1,0 +1,31 @@
+backend:
+  name: github
+  repo: marshux/marshux.github.io
+  branch: main
+  # TODO: set to your deployed Cloudflare Worker URL (see cloudflare-worker/oauth-proxy.js)
+  base_url: https://REPLACE-WITH-YOUR-WORKER.workers.dev
+  auth_endpoint: auth
+
+media_library:
+  name: cloudinary
+  config:
+    cloud_name: hf0tmghh
+    api_key: "443229755747333"
+
+publish_mode: simple
+
+collections:
+  - name: photography
+    label: Photography
+    files:
+      - name: photos
+        label: Photo Board
+        file: data/photos.json
+        fields:
+          - name: photos
+            label: Photos
+            widget: list
+            label_singular: Photo
+            fields:
+              - { name: image, label: Image, widget: image }
+              - { name: alt, label: Caption / alt text, widget: string, required: false }

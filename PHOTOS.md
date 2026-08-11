@@ -1,30 +1,16 @@
-# Adding photos to the Photography board
+# Publishing photos
 
-Photos are hosted on [Cloudinary](https://cloudinary.com) (free tier) rather than
-committed to this repo — no binaries in git, and Cloudinary auto-optimizes
-format/quality/size on delivery.
+Photos are published through a login-gated admin panel at
+**https://marshux.github.io/admin/**, not by hand-editing files.
 
-## One-time setup
+- The admin panel is [Decap CMS](https://decapcms.org), backed by this GitHub
+  repo. Logging in requires a GitHub account with push access to
+  `marshux/marshux.github.io` — see `SETUP.md` for the one-time OAuth setup.
+- Uploading an image opens Cloudinary's media library widget, which requires
+  logging into the Cloudinary account tied to the configured `api_key`
+  (in `admin/config.yml`). The Cloudinary API secret is never used by the
+  site or stored anywhere in this repo.
+- Saving in the admin panel commits directly to `data/photos.json` on `main`;
+  the photography page reads that file and renders whatever's listed.
 
-1. Sign up free at https://cloudinary.com (no credit card required).
-2. On your Cloudinary dashboard, copy your **Cloud Name**.
-3. Open `js/main.js` and set:
-   ```js
-   const CLOUDINARY_CLOUD_NAME = "your-cloud-name";
-   ```
-4. Commit and push that change.
-
-## Adding a new photo
-
-1. In the Cloudinary dashboard, open the **Media Library** and upload the image
-   (drag and drop). No need to resize/compress beforehand — Cloudinary handles
-   that on delivery.
-2. Copy the image's **Public ID** shown in the Media Library (e.g. `portfolio/sunset-ridge`).
-3. Add an entry to `data/photos.json`:
-   ```json
-   { "publicId": "portfolio/sunset-ridge", "alt": "Sunset over the ridge" }
-   ```
-4. Commit and push `data/photos.json`.
-
-The photography page reads this manifest and builds an optimized, auto-formatted
-delivery URL for each entry — nothing else to configure per photo.
+No local file management needed — everything happens through the admin UI.
