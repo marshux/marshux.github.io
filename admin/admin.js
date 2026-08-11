@@ -316,7 +316,7 @@ publishBtn.addEventListener("click", async () => {
     dirty = false;
     setStatus("Published! The live site will update shortly. Returning to the homepage…");
     setTimeout(() => {
-      window.location.href = "../index.html";
+      window.location.href = "../";
     }, 1500);
   } catch (err) {
     setStatus(`Publish failed: ${err.message}`);

@@ -229,10 +229,9 @@ main {
 
 .hero h1 {
   font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 700;
+  font-weight: 600;
   margin: 24px 0 6px;
-  font-size: 2.6rem;
+  font-size: 2.4rem;
 }
 
 .hero h1::after {
@@ -256,19 +255,32 @@ main {
   margin: 0 auto 20px;
 }
 
-.hero-links a {
-  display: inline-block;
-  padding: 8px 18px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--fg);
-  font-size: 0.9rem;
+.hero-links {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
 }
 
-.hero-links a:hover {
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  color: var(--fg);
+}
+
+.social-link:hover {
   border-color: var(--accent);
   color: var(--accent);
   text-decoration: none;
+}
+
+.social-link svg {
+  width: 18px;
+  height: 18px;
 }
 
 .section {
