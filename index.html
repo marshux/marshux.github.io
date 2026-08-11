@@ -9,20 +9,10 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <header class="site-header">
-    <nav class="nav">
-      <a class="nav-brand" href="#top">marshux</a>
-      <div class="nav-links">
-        <a href="#interests">Interests</a>
-        <a href="#projects">Projects</a>
-        <a href="#photography">Photography</a>
-        <a href="#contact">Contact</a>
-      </div>
-    </nav>
-  </header>
+  <header class="site-header" data-include="partials/nav.html"></header>
 
   <main>
-    <section id="top" class="hero">
+    <section class="hero">
       <img class="avatar" src="https://github.com/marshux.png" alt="Marshal Xu" width="120" height="120" />
       <h1>Marshal Xu</h1>
       <p class="handle">@marshux</p>
@@ -33,40 +23,29 @@
       </div>
     </section>
 
-    <section id="interests" class="section">
-      <h2>Interests</h2>
-      <!-- Add/remove chips freely -->
-      <ul class="chips">
-        <li>Software Engineering</li>
-        <li>Photography</li>
-        <li>Open Source</li>
-      </ul>
-    </section>
-
-    <section id="projects" class="section">
-      <h2>Projects</h2>
-      <p class="section-sub">Pulled live from <a href="https://github.com/marshux?tab=repositories" target="_blank" rel="noopener">github.com/marshux</a></p>
-      <div id="projects-grid" class="projects-grid">
-        <p class="loading">Loading projects&hellip;</p>
-      </div>
-    </section>
-
-    <section id="photography" class="section">
-      <h2>Photography</h2>
-      <p class="section-sub">See <a href="photos/README.md">photos/README.md</a> for how to add new shots.</p>
-      <div id="photo-grid" class="photo-grid"></div>
-    </section>
-
-    <section id="contact" class="section">
-      <h2>Contact</h2>
-      <p><a href="https://github.com/marshux" target="_blank" rel="noopener">github.com/marshux</a></p>
-    </section>
+    <nav class="home-cards" aria-label="Site sections">
+      <a class="home-card" href="interests.html">
+        <h3>Interests</h3>
+        <p>What I care about outside code.</p>
+      </a>
+      <a class="home-card" href="projects.html">
+        <h3>Projects</h3>
+        <p>Live feed of what I'm building on GitHub.</p>
+      </a>
+      <a class="home-card" href="photography.html">
+        <h3>Photography</h3>
+        <p>A board of shots I've taken.</p>
+      </a>
+      <a class="home-card" href="contact.html">
+        <h3>Contact</h3>
+        <p>Ways to reach me.</p>
+      </a>
+    </nav>
   </main>
 
-  <footer class="site-footer">
-    <p>&copy; <span id="year"></span> Marshal Xu</p>
-  </footer>
+  <footer class="site-footer" data-include="partials/footer.html"></footer>
 
+  <script src="js/include.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

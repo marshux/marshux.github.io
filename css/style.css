@@ -89,10 +89,46 @@ a:hover {
   text-decoration: none;
 }
 
+.nav-links a.active {
+  color: var(--accent);
+}
+
 main {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 24px;
+}
+
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 8px 0 56px;
+}
+
+.home-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  color: var(--fg);
+  transition: border-color 0.15s ease;
+}
+
+.home-card:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.home-card h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.home-card p {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 0.88rem;
 }
 
 .hero {
@@ -142,6 +178,11 @@ main {
   border-top: 1px solid var(--border);
 }
 
+.section.section--first {
+  border-top: none;
+}
+
+.section h1,
 .section h2 {
   font-size: 1.3rem;
   margin-bottom: 6px;
