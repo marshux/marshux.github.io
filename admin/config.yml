@@ -2,8 +2,7 @@ backend:
   name: github
   repo: marshux/marshux.github.io
   branch: main
-  # TODO: set to your deployed Cloudflare Worker URL (see cloudflare-worker/oauth-proxy.js)
-  base_url: https://REPLACE-WITH-YOUR-WORKER.workers.dev
+  base_url: https://marshux-cms-oauth.marshalx08.workers.dev
   auth_endpoint: auth
 
 media_library:
