@@ -64,7 +64,7 @@ function render() {
   photoGrid.innerHTML = photos
     .map(
       (p, i) => `
-    <div class="admin-photo-card">
+    <div class="admin-photo-card" draggable="true" data-index="${i}">
       <img src="${escapeHtml(p.image)}" alt="" loading="lazy" />
       <div class="card-body">
         <input type="text" value="${escapeHtml(p.alt || "")}" placeholder="Caption" data-index="${i}" class="caption-input" />
@@ -84,6 +84,36 @@ function render() {
   photoGrid.querySelectorAll(".delete-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       photos.splice(Number(e.target.dataset.index), 1);
+      markDirty();
+      render();
+    });
+  });
+
+  photoGrid.querySelectorAll(".admin-photo-card").forEach((card) => {
+    card.addEventListener("dragstart", (e) => {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", card.dataset.index);
+      card.classList.add("dragging");
+    });
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+    });
+    card.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      card.classList.add("drag-over");
+    });
+    card.addEventListener("dragleave", () => {
+      card.classList.remove("drag-over");
+    });
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+      const fromIndex = Number(e.dataTransfer.getData("text/plain"));
+      const toIndex = Number(card.dataset.index);
+      if (fromIndex === toIndex) return;
+      const [moved] = photos.splice(fromIndex, 1);
+      photos.splice(toIndex, 0, moved);
       markDirty();
       render();
     });
@@ -284,7 +314,10 @@ publishBtn.addEventListener("click", async () => {
     const data = await res.json();
     fileSha = data.content.sha;
     dirty = false;
-    setStatus("Published. The live site will update after GitHub Pages rebuilds (usually under a minute).");
+    setStatus("Published! The live site will update shortly. Returning to the homepage…");
+    setTimeout(() => {
+      window.location.href = "../index.html";
+    }, 1500);
   } catch (err) {
     setStatus(`Publish failed: ${err.message}`);
     publishBtn.disabled = false;

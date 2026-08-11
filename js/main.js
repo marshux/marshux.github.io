@@ -65,6 +65,10 @@ async function loadProjects() {
   }
 }
 
+// Deterministic tile-size pattern so the photography grid reads as a collage
+// (varying tile sizes) while still laying photos out in strict array order.
+const PHOTO_SIZE_PATTERN = ["size-big", "", "size-wide", "", "", "size-tall", "", "size-wide", "", "size-tall"];
+
 async function loadPhotos() {
   const grid = document.getElementById("photo-grid");
   if (!grid) return;
@@ -81,10 +85,10 @@ async function loadPhotos() {
     }
 
     grid.innerHTML = photos
-      .map(
-        (p) =>
-          `<img src="${withAutoOptimize(p.image)}" alt="${escapeHtml(p.alt || "")}" loading="lazy" />`
-      )
+      .map((p, i) => {
+        const sizeClass = PHOTO_SIZE_PATTERN[i % PHOTO_SIZE_PATTERN.length];
+        return `<img class="${sizeClass}" src="${withAutoOptimize(p.image)}" alt="${escapeHtml(p.alt || "")}" loading="lazy" />`;
+      })
       .join("");
   } catch (err) {
     grid.innerHTML = `<p class="empty-state">Photography board coming soon.</p>`;

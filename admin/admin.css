@@ -71,6 +71,16 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  cursor: grab;
+}
+
+.admin-photo-card.dragging {
+  opacity: 0.4;
+}
+
+.admin-photo-card.drag-over {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
 }
 
 .admin-photo-card img {
