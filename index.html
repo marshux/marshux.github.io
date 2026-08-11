@@ -1,9 +1,72 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>My First Webpage</title>
-  </head>
-  <body>
-    <h1>Welcome to my first webpage!</h1>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marshal Xu</title>
+  <meta name="description" content="Marshal Xu &mdash; software engineer, builder, photographer." />
+  <link rel="icon" href="https://github.com/marshux.png" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="nav-brand" href="#top">marshux</a>
+      <div class="nav-links">
+        <a href="#interests">Interests</a>
+        <a href="#projects">Projects</a>
+        <a href="#photography">Photography</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section id="top" class="hero">
+      <img class="avatar" src="https://github.com/marshux.png" alt="Marshal Xu" width="120" height="120" />
+      <h1>Marshal Xu</h1>
+      <p class="handle">@marshux</p>
+      <!-- Edit this tagline to make it yours -->
+      <p class="tagline">Software engineer &amp; builder. Figuring out what to make next.</p>
+      <div class="hero-links">
+        <a href="https://github.com/marshux" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </section>
+
+    <section id="interests" class="section">
+      <h2>Interests</h2>
+      <!-- Add/remove chips freely -->
+      <ul class="chips">
+        <li>Software Engineering</li>
+        <li>Photography</li>
+        <li>Open Source</li>
+      </ul>
+    </section>
+
+    <section id="projects" class="section">
+      <h2>Projects</h2>
+      <p class="section-sub">Pulled live from <a href="https://github.com/marshux?tab=repositories" target="_blank" rel="noopener">github.com/marshux</a></p>
+      <div id="projects-grid" class="projects-grid">
+        <p class="loading">Loading projects&hellip;</p>
+      </div>
+    </section>
+
+    <section id="photography" class="section">
+      <h2>Photography</h2>
+      <p class="section-sub">See <a href="photos/README.md">photos/README.md</a> for how to add new shots.</p>
+      <div id="photo-grid" class="photo-grid"></div>
+    </section>
+
+    <section id="contact" class="section">
+      <h2>Contact</h2>
+      <p><a href="https://github.com/marshux" target="_blank" rel="noopener">github.com/marshux</a></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; <span id="year"></span> Marshal Xu</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
 </html>
