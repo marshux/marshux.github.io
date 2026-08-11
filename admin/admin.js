@@ -18,6 +18,7 @@ let token = sessionStorage.getItem(TOKEN_KEY) || null;
 let photos = [];
 let fileSha = null;
 let dirty = false;
+let draggedIndex = null;
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -62,6 +63,14 @@ function markDirty() {
 
 const SIZE_LABELS = { "": "Small", wide: "Wide", tall: "Tall", big: "Big" };
 
+let keyCounter = 0;
+function keyFor(photo) {
+  if (!photo.__key) {
+    Object.defineProperty(photo, "__key", { value: `k${keyCounter++}`, enumerable: false });
+  }
+  return photo.__key;
+}
+
 function render() {
   photoGrid.innerHTML = photos
     .map((p, i) => {
@@ -71,7 +80,7 @@ function render() {
         .map(([value, label]) => `<option value="${value}" ${value === size ? "selected" : ""}>${label}</option>`)
         .join("");
       return `
-    <div class="admin-photo-card ${sizeClass}" draggable="true" data-index="${i}">
+    <div class="admin-photo-card ${sizeClass}" draggable="true" data-index="${i}" data-key="${keyFor(p)}">
       <img src="${escapeHtml(p.image)}" alt="" loading="lazy" />
       <div class="card-body">
         <input type="text" value="${escapeHtml(p.alt || "")}" placeholder="Caption" data-index="${i}" class="caption-input" />
@@ -101,7 +110,7 @@ function render() {
         delete photos[idx].size;
       }
       markDirty();
-      render();
+      renderWithFlip();
     });
   });
 
@@ -109,40 +118,93 @@ function render() {
     btn.addEventListener("click", (e) => {
       photos.splice(Number(e.target.dataset.index), 1);
       markDirty();
-      render();
+      renderWithFlip();
     });
   });
 
   photoGrid.querySelectorAll(".admin-photo-card").forEach((card) => {
     card.addEventListener("dragstart", (e) => {
+      draggedIndex = Number(card.dataset.index);
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", card.dataset.index);
-      card.classList.add("dragging");
+      requestAnimationFrame(() => card.classList.add("dragging"));
     });
     card.addEventListener("dragend", () => {
-      card.classList.remove("dragging");
+      draggedIndex = null;
+      photoGrid.querySelectorAll(".admin-photo-card").forEach((c) => c.classList.remove("dragging"));
     });
-    card.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      card.classList.add("drag-over");
-    });
-    card.addEventListener("dragleave", () => {
-      card.classList.remove("drag-over");
-    });
-    card.addEventListener("drop", (e) => {
-      e.preventDefault();
-      card.classList.remove("drag-over");
-      const fromIndex = Number(e.dataTransfer.getData("text/plain"));
-      const toIndex = Number(card.dataset.index);
-      if (fromIndex === toIndex) return;
-      const [moved] = photos.splice(fromIndex, 1);
-      photos.splice(toIndex, 0, moved);
-      markDirty();
-      render();
+  });
+
+  if (draggedIndex !== null) {
+    const draggedCard = photoGrid.querySelector(`.admin-photo-card[data-index="${draggedIndex}"]`);
+    if (draggedCard) draggedCard.classList.add("dragging");
+  }
+}
+
+// Re-renders the grid while smoothly animating any card that moved to its
+// new position (FLIP technique), so reordering/resizing reads as a live
+// shift instead of an instant jump.
+function renderWithFlip() {
+  const firstRects = new Map();
+  photoGrid.querySelectorAll(".admin-photo-card").forEach((card) => {
+    firstRects.set(card.dataset.key, card.getBoundingClientRect());
+  });
+
+  render();
+
+  photoGrid.querySelectorAll(".admin-photo-card").forEach((card) => {
+    const first = firstRects.get(card.dataset.key);
+    if (!first) return;
+    const last = card.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (!dx && !dy) return;
+    card.style.transition = "none";
+    card.style.transform = `translate(${dx}px, ${dy}px)`;
+    requestAnimationFrame(() => {
+      card.style.transition = "transform 0.25s ease";
+      card.style.transform = "";
     });
   });
 }
+
+function closestIndexToPoint(x, y) {
+  let closest = null;
+  let closestDist = Infinity;
+  photoGrid.querySelectorAll(".admin-photo-card[data-index]").forEach((card) => {
+    const rect = card.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dist = (x - cx) ** 2 + (y - cy) ** 2;
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = Number(card.dataset.index);
+    }
+  });
+  return closest;
+}
+
+photoGrid.addEventListener("dragover", (e) => {
+  if (draggedIndex === null) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = "move";
+
+  const targetCard = e.target.closest(".admin-photo-card[data-index]");
+  const targetIndex = targetCard
+    ? Number(targetCard.dataset.index)
+    : closestIndexToPoint(e.clientX, e.clientY);
+
+  if (targetIndex === null || targetIndex === draggedIndex) return;
+  const [moved] = photos.splice(draggedIndex, 1);
+  photos.splice(targetIndex, 0, moved);
+  draggedIndex = targetIndex;
+  markDirty();
+  renderWithFlip();
+});
+
+photoGrid.addEventListener("drop", (e) => {
+  e.preventDefault();
+});
 
 function loginWithGithub() {
   return new Promise((resolve, reject) => {
@@ -293,7 +355,7 @@ async function handleFiles(fileList) {
   if (results.some((r) => r.status === "fulfilled")) {
     markDirty();
   }
-  render();
+  renderWithFlip();
   setStatus(errors.length ? errors.join(" | ") : "");
 }
 

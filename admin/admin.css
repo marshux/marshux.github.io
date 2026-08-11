@@ -94,11 +94,6 @@
   opacity: 0.4;
 }
 
-.admin-photo-card.drag-over {
-  outline: 2px dashed var(--accent);
-  outline-offset: -2px;
-}
-
 .admin-photo-card img {
   flex: 1;
   min-height: 0;
