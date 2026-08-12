@@ -16,9 +16,7 @@ function highlightActiveNavLink() {
     current = "admin";
   }
   document.querySelectorAll(".nav-links a[data-page]").forEach((link) => {
-    if (link.getAttribute("data-page") === current) {
-      link.classList.add("active");
-    }
+    link.classList.toggle("active", link.getAttribute("data-page") === current);
   });
 }
 
