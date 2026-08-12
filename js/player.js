@@ -117,6 +117,7 @@ async function initPlayer() {
   function loadTrack(i, { autoplay = false, startAt = 0 } = {}) {
     index = ((i % tracks.length) + tracks.length) % tracks.length;
     audio.src = tracks[index].url;
+    audio.load(); // force the element to actually drop the old source and reload
     updateTrackInfo();
     updateQueueActive();
     if (startAt) {
@@ -173,9 +174,9 @@ async function initPlayer() {
     if (isTyping) return;
 
     if (e.code === "Space" || e.key === " ") {
-      e.preventDefault();
-      toggleBtn.click();
-    } else if (e.key === "m" || e.key === "M") {
+      e.preventDefault(); // always suppress page scroll, even while the key auto-repeats
+      if (!e.repeat) toggleBtn.click();
+    } else if ((e.key === "m" || e.key === "M") && !e.repeat) {
       muteBtn.click();
     }
   });
