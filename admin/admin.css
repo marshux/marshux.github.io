@@ -1,15 +1,3 @@
-.admin-main {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
-}
-
-.admin-main h1 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  margin-bottom: 20px;
-}
-
 .btn {
   display: inline-block;
   padding: 9px 18px;
@@ -33,18 +21,6 @@
   font-weight: 500;
 }
 
-.admin-status {
-  color: var(--fg-muted);
-  font-size: 0.88rem;
-  min-height: 1.2em;
-}
-
-.admin-toolbar {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
 .dropzone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);
@@ -57,35 +33,6 @@
 .dropzone.dragover {
   border-color: var(--accent);
   color: var(--fg);
-}
-
-.admin-tabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 24px;
-}
-
-.admin-tab {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 10px 4px;
-  margin-right: 24px;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--fg-muted);
-  cursor: pointer;
-}
-
-.admin-tab:hover {
-  color: var(--fg);
-}
-
-.admin-tab.active {
-  color: var(--fg);
-  border-bottom-color: var(--accent);
 }
 
 /* Same grid metrics as .photo-grid on the live site, so this is a true

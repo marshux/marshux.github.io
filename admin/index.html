@@ -17,31 +17,35 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/tailwind.css" />
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
   <header class="site-header" data-include="../partials/nav.html"></header>
 
-  <main class="admin-main">
-    <h1>Admin</h1>
+  <main class="max-w-3xl mx-auto px-6 py-12 pb-20">
+    <h1 class="font-editorial font-semibold text-2xl text-ink mb-8">Admin</h1>
 
-    <section id="login-view">
-      <p class="section-sub">Log in with a GitHub account that has push access to this repo.</p>
+    <section id="login-view" class="max-w-sm mx-auto rounded-2xl border border-line bg-surface px-8 py-10 text-center">
+      <p class="text-ink-muted text-sm mb-5">Log in with a GitHub account that has push access to this repo.</p>
       <button id="login-btn" class="btn">Login with GitHub</button>
-      <p id="login-status" class="admin-status"></p>
+      <p id="login-status" class="text-ink-muted text-sm min-h-5 mt-3"></p>
     </section>
 
     <section id="manager-view" hidden>
-      <div class="admin-toolbar">
+      <div class="flex items-center justify-between border-b border-line pb-5 mb-6">
         <button id="logout-btn" class="btn btn-secondary">Log out</button>
         <button id="publish-btn" class="btn" disabled>Publish changes</button>
       </div>
 
-      <p id="status-log" class="admin-status"></p>
+      <p id="status-log" class="text-ink-muted text-sm min-h-5 mb-5"></p>
 
-      <div class="admin-tabs" role="tablist">
-        <button class="admin-tab active" type="button" role="tab" aria-selected="true" data-tab="photos-panel">Photos</button>
-        <button class="admin-tab" type="button" role="tab" aria-selected="false" data-tab="music-panel">Music</button>
+      <div class="mb-6">
+        <label for="section-select" class="sr-only">Section</label>
+        <select id="section-select" class="rounded-lg border border-line bg-surface text-ink font-editorial font-semibold text-base px-4 py-2 cursor-pointer">
+          <option value="photos-panel">Photos</option>
+          <option value="music-panel">Music</option>
+        </select>
       </div>
 
       <div id="photos-panel" class="admin-tab-panel">
@@ -52,7 +56,7 @@
             <input id="file-input" type="file" accept="image/*" multiple hidden />
           </label>
         </div>
-        <p class="section-sub">Drag photos to reorder them. This grid matches the live collage layout exactly &mdash; use the size dropdown on each photo (hover to reveal) to change its tile shape.</p>
+        <p class="text-ink-muted text-sm mt-3 mb-6">Drag photos to reorder them. This grid matches the live collage layout exactly &mdash; use the size dropdown on each photo (hover to reveal) to change its tile shape.</p>
         <div id="admin-photo-grid" class="admin-photo-grid"></div>
       </div>
 
@@ -64,7 +68,7 @@
             <input id="music-file-input" type="file" accept="audio/*" multiple hidden />
           </label>
         </div>
-        <p class="section-sub">Drag tracks to reorder the queue visitors hear. Edit title/artist inline.</p>
+        <p class="text-ink-muted text-sm mt-3 mb-6">Drag tracks to reorder the queue visitors hear. Edit title/artist inline.</p>
         <div id="admin-track-list" class="admin-track-list"></div>
       </div>
     </section>

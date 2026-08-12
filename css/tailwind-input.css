@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* Maps Tailwind's generated utilities onto the site's existing runtime
+   theme variables (defined in css/style.css) so Tailwind-styled markup
+   stays in sync with light/dark mode and the accent color automatically,
+   instead of hardcoding a second, divergent color palette. */
+@theme {
+  --color-surface: var(--bg-alt);
+  --color-canvas: var(--bg);
+  --color-ink: var(--fg);
+  --color-ink-muted: var(--fg-muted);
+  --color-accent: var(--accent);
+  --color-line: var(--border);
+  --radius-card: var(--radius);
+  --font-editorial: var(--font-display);
+}

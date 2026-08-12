@@ -1,0 +1,12 @@
+{
+  "name": "marshux.github.io",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i ./css/tailwind-input.css -o ./css/tailwind.css --minify",
+    "watch": "tailwindcss -i ./css/tailwind-input.css -o ./css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
