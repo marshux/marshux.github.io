@@ -49,6 +49,13 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Theme toggle crossfade (see initThemeToggle in js/main.js). Snapshots are
+   rasterized once each, so this is cheap regardless of duration. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
+}
+
 body {
   margin: 0;
   background-color: var(--bg);

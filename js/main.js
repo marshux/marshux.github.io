@@ -32,8 +32,19 @@ function initThemeToggle() {
   if (!toggle) return;
   toggle.addEventListener("click", () => {
     const next = currentTheme() === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem(THEME_KEY, next);
+    const apply = () => {
+      document.documentElement.setAttribute("data-theme", next);
+      localStorage.setItem(THEME_KEY, next);
+    };
+    // View Transitions crossfade two rasterized snapshots (each computed
+    // once) instead of live-animating colors, so it doesn't force the
+    // sticky nav/player's backdrop-filter blur to recompute every frame
+    // the way the old CSS transition did.
+    if (document.startViewTransition) {
+      document.startViewTransition(apply);
+    } else {
+      apply();
+    }
   });
 }
 
