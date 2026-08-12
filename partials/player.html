@@ -22,4 +22,10 @@
     <svg class="icon-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9zM19.5 12l2-2-1-1-2 2-2-2-1 1 2 2-2 2 1 1 2-2 2 2 1-1z"></path></svg>
   </button>
   <input id="player-volume-slider" type="range" min="0" max="100" value="50" aria-label="Volume" />
+  <button id="player-queue-toggle" class="player-btn" type="button" aria-label="Show queue">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 6h16M4 12h16M4 18h10"></path>
+    </svg>
+  </button>
 </div>
+<ul id="player-queue" class="player-queue" hidden></ul>

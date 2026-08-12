@@ -12,6 +12,12 @@ function savePlayerState(state) {
   sessionStorage.setItem(PLAYER_STATE_KEY, JSON.stringify(state));
 }
 
+function escapePlayerHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 async function initPlayer() {
   const bar = document.getElementById("player-bar");
   const audio = document.getElementById("player-audio");
@@ -39,6 +45,8 @@ async function initPlayer() {
   const nextBtn = document.getElementById("player-next");
   const muteBtn = document.getElementById("player-mute");
   const volumeSlider = document.getElementById("player-volume-slider");
+  const queueToggleBtn = document.getElementById("player-queue-toggle");
+  const queueList = document.getElementById("player-queue");
 
   const savedState = loadPlayerState();
   let index =
@@ -67,6 +75,30 @@ async function initPlayer() {
     muteBtn.setAttribute("aria-label", audio.muted ? "Unmute" : "Mute");
   }
 
+  function renderQueue() {
+    queueList.innerHTML = tracks
+      .map(
+        (t, i) => `
+      <li class="player-queue-item" data-index="${i}">
+        <span class="player-queue-title">${escapePlayerHtml(t.title || "Untitled")}</span>
+        <span class="player-queue-artist">${escapePlayerHtml(t.artist || "")}</span>
+      </li>`
+      )
+      .join("");
+    queueList.querySelectorAll(".player-queue-item").forEach((li) => {
+      li.addEventListener("click", () => {
+        loadTrack(Number(li.dataset.index), { autoplay: true });
+      });
+    });
+    updateQueueActive();
+  }
+
+  function updateQueueActive() {
+    queueList.querySelectorAll(".player-queue-item").forEach((li) => {
+      li.classList.toggle("active", Number(li.dataset.index) === index);
+    });
+  }
+
   function persist() {
     savePlayerState({
       trackIndex: index,
@@ -81,6 +113,7 @@ async function initPlayer() {
     index = ((i % tracks.length) + tracks.length) % tracks.length;
     audio.src = tracks[index].url;
     updateTrackInfo();
+    updateQueueActive();
     if (startAt) {
       audio.addEventListener(
         "loadedmetadata",
@@ -122,6 +155,10 @@ async function initPlayer() {
     persist();
   });
 
+  queueToggleBtn.addEventListener("click", () => {
+    queueList.hidden = !queueList.hidden;
+  });
+
   audio.addEventListener("play", () => {
     updateToggleIcon();
     persist();
@@ -140,6 +177,7 @@ async function initPlayer() {
 
   bar.hidden = false;
   updateMuteIcon();
+  renderQueue();
   loadTrack(index, { autoplay: wantsPlaying, startAt: resumeAt });
   updateToggleIcon();
 }

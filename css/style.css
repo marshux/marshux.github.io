@@ -561,6 +561,59 @@ main {
   cursor: pointer;
 }
 
+.player-queue {
+  list-style: none;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-queue[hidden] {
+  display: none;
+}
+
+.player-queue-item {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.player-queue-item:hover {
+  background: var(--bg-alt);
+}
+
+.player-queue-item.active {
+  background: var(--bg-alt);
+}
+
+.player-queue-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-queue-item.active .player-queue-title {
+  color: var(--accent);
+}
+
+.player-queue-artist {
+  font-size: 0.68rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 @media (max-width: 520px) {
   .nav-links {
     gap: 12px;
