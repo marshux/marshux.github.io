@@ -1,3 +1,24 @@
 {
-  "tracks": []
+  "tracks": [
+    {
+      "title": "花が咲く道",
+      "artist": "THE CHARM PARK",
+      "url": "https://res.cloudinary.com/hf0tmghh/video/upload/v1786507949/bwaa1me24zjys7l8seha.mp3"
+    },
+    {
+      "title": "Akari",
+      "artist": "Soushi Sakiyama",
+      "url": "https://res.cloudinary.com/hf0tmghh/video/upload/v1786507949/gtsbbalbys4nzn48zcns.mp3"
+    },
+    {
+      "title": "A Town with an Ocean View",
+      "artist": "Joe Hisaishi",
+      "url": "https://res.cloudinary.com/hf0tmghh/video/upload/v1786507949/sfpwheebtbx0l3lj4mmp.mp3"
+    },
+    {
+      "title": "One Summer's Day",
+      "artist": "Joe Hisaishi",
+      "url": "https://res.cloudinary.com/hf0tmghh/video/upload/v1786507949/al94rdortkgdo30tycqp.mp3"
+    }
+  ]
 }
