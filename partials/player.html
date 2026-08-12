@@ -1,4 +1,5 @@
 <audio id="player-audio" preload="metadata"></audio>
+<p class="player-eyebrow">Now Playing</p>
 <div id="player-track-info" class="player-track-info">
   <span id="player-title" class="player-title">&nbsp;</span>
   <span id="player-artist" class="player-artist"></span>
@@ -15,7 +16,10 @@
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 6h2v12h-2zM5 6l9.5 6L5 18z"></path></svg>
   </button>
 </div>
-<button id="player-mute" class="player-btn" type="button" aria-label="Mute">
-  <svg class="icon-sound" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9zM16.5 12A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4Z"></path></svg>
-  <svg class="icon-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9zM19.5 12l2-2-1-1-2 2-2-2-1 1 2 2-2 2 1 1 2-2 2 2 1-1z"></path></svg>
-</button>
+<div class="player-volume">
+  <button id="player-mute" class="player-btn" type="button" aria-label="Mute">
+    <svg class="icon-sound" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9zM16.5 12A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4Z"></path></svg>
+    <svg class="icon-muted" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9zM19.5 12l2-2-1-1-2 2-2-2-1 1 2 2-2 2 1 1 2-2 2 2 1-1z"></path></svg>
+  </button>
+  <input id="player-volume-slider" type="range" min="0" max="100" value="50" aria-label="Volume" />
+</div>

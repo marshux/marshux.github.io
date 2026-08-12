@@ -38,6 +38,7 @@ async function initPlayer() {
   const prevBtn = document.getElementById("player-prev");
   const nextBtn = document.getElementById("player-next");
   const muteBtn = document.getElementById("player-mute");
+  const volumeSlider = document.getElementById("player-volume-slider");
 
   const savedState = loadPlayerState();
   let index =
@@ -47,6 +48,8 @@ async function initPlayer() {
   const wantsPlaying = Boolean(savedState.playing);
   const resumeAt = typeof savedState.currentTime === "number" ? savedState.currentTime : 0;
   audio.muted = Boolean(savedState.muted);
+  audio.volume = typeof savedState.volume === "number" ? savedState.volume : 0.5;
+  volumeSlider.value = String(Math.round(audio.volume * 100));
 
   function updateTrackInfo() {
     const track = tracks[index];
@@ -70,6 +73,7 @@ async function initPlayer() {
       currentTime: audio.currentTime || 0,
       playing: !audio.paused,
       muted: audio.muted,
+      volume: audio.volume,
     });
   }
 
@@ -113,6 +117,11 @@ async function initPlayer() {
     persist();
   });
 
+  volumeSlider.addEventListener("input", () => {
+    audio.volume = Number(volumeSlider.value) / 100;
+    persist();
+  });
+
   audio.addEventListener("play", () => {
     updateToggleIcon();
     persist();
@@ -129,7 +138,6 @@ async function initPlayer() {
     if (document.visibilityState === "hidden") persist();
   });
 
-  document.body.classList.add("has-player");
   bar.hidden = false;
   updateMuteIcon();
   loadTrack(index, { autoplay: wantsPlaying, startAt: resumeAt });

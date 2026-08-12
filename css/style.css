@@ -430,25 +430,35 @@ main {
 
 #player-bar {
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 84px;
+  left: 20px;
   z-index: 20;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 20px;
+  flex-direction: column;
+  gap: 10px;
+  width: 210px;
+  padding: 14px 16px;
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(8px);
-  border-top: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
 }
 
 #player-bar[hidden] {
   display: none;
 }
 
+.player-eyebrow {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-muted);
+}
+
 .player-track-info {
-  flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -538,8 +548,17 @@ main {
   display: inline-block;
 }
 
-body.has-player {
-  padding-bottom: 64px;
+.player-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-volume input[type="range"] {
+  flex: 1;
+  height: 4px;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 @media (max-width: 520px) {
@@ -555,10 +574,9 @@ body.has-player {
     font-size: 2rem;
   }
   #player-bar {
-    gap: 10px;
-    padding: 8px 14px;
-  }
-  .player-artist {
-    display: none;
+    top: 74px;
+    left: 12px;
+    width: 180px;
+    padding: 12px;
   }
 }
