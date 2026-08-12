@@ -162,3 +162,82 @@
   text-align: center;
   padding: 12px;
 }
+
+.admin-section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin: 40px 0 12px;
+}
+
+.admin-main h2.admin-section-title:first-of-type {
+  margin-top: 0;
+}
+
+.admin-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.track-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  cursor: grab;
+}
+
+.track-row.dragging {
+  opacity: 0.4;
+}
+
+.track-row.uploading {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+}
+
+.track-handle {
+  flex: 0 0 auto;
+  color: var(--fg-muted);
+  font-size: 1rem;
+}
+
+.track-row input[type="text"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg);
+  padding: 6px 8px;
+  font-size: 0.85rem;
+}
+
+.track-title-input {
+  flex: 2;
+  min-width: 0;
+}
+
+.track-artist-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.track-row .delete-btn {
+  flex: 0 0 auto;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  padding: 4px 10px;
+  font-size: 0.9rem;
+}
+
+.track-row .delete-btn:hover {
+  color: #d5544a;
+  border-color: #d5544a;
+}

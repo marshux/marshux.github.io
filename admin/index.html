@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="robots" content="noindex" />
-  <title>Photo Admin &mdash; marshux.github.io</title>
+  <title>Admin &mdash; marshux.github.io</title>
   <script>
     (function () {
       var stored = localStorage.getItem("marshux-theme");
@@ -23,7 +23,7 @@
   <header class="site-header" data-include="../partials/nav.html"></header>
 
   <main class="admin-main">
-    <h1>Photo Admin</h1>
+    <h1>Admin</h1>
 
     <section id="login-view">
       <p class="section-sub">Log in with a GitHub account that has push access to this repo.</p>
@@ -37,6 +37,9 @@
         <button id="publish-btn" class="btn" disabled>Publish changes</button>
       </div>
 
+      <p id="status-log" class="admin-status"></p>
+
+      <h2 class="admin-section-title">Photos</h2>
       <div id="dropzone" class="dropzone">
         <p>Drag &amp; drop photos here, or</p>
         <label class="btn btn-secondary">
@@ -44,11 +47,19 @@
           <input id="file-input" type="file" accept="image/*" multiple hidden />
         </label>
       </div>
-
-      <p id="status-log" class="admin-status"></p>
-
       <p class="section-sub">Drag photos to reorder them. This grid matches the live collage layout &mdash; use the size dropdown on each photo to change its tile shape.</p>
       <div id="admin-photo-grid" class="admin-photo-grid"></div>
+
+      <h2 class="admin-section-title">Music</h2>
+      <div id="music-dropzone" class="dropzone">
+        <p>Drag &amp; drop audio files here, or</p>
+        <label class="btn btn-secondary">
+          Choose files
+          <input id="music-file-input" type="file" accept="audio/*" multiple hidden />
+        </label>
+      </div>
+      <p class="section-sub">Drag tracks to reorder the queue visitors hear. Edit title/artist inline.</p>
+      <div id="admin-track-list" class="admin-track-list"></div>
     </section>
   </main>
 

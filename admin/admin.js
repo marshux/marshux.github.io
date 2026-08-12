@@ -1,6 +1,7 @@
 const WORKER_URL = MarshuxAuth.WORKER_URL;
 const GITHUB_REPO = MarshuxAuth.GITHUB_REPO;
 const PHOTOS_PATH = "data/photos.json";
+const PLAYLIST_PATH = "data/playlist.json";
 
 const loginView = document.getElementById("login-view");
 const managerView = document.getElementById("manager-view");
@@ -8,16 +9,23 @@ const loginBtn = document.getElementById("login-btn");
 const loginStatus = document.getElementById("login-status");
 const logoutBtn = document.getElementById("logout-btn");
 const publishBtn = document.getElementById("publish-btn");
+const statusLog = document.getElementById("status-log");
+
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("file-input");
-const statusLog = document.getElementById("status-log");
 const photoGrid = document.getElementById("admin-photo-grid");
+
+const musicDropzone = document.getElementById("music-dropzone");
+const musicFileInput = document.getElementById("music-file-input");
+const trackList = document.getElementById("admin-track-list");
 
 let token = MarshuxAuth.getToken();
 let photos = [];
-let fileSha = null;
-let dirty = false;
-let draggedIndex = null;
+let tracks = [];
+let photosSha = null;
+let playlistSha = null;
+let photosDirty = false;
+let tracksDirty = false;
 
 function escapeHtml(str) {
   const div = document.createElement("div");
@@ -55,22 +63,169 @@ function githubHeaders(extra = {}) {
   };
 }
 
-function markDirty() {
-  dirty = true;
+function markPhotosDirty() {
+  photosDirty = true;
   publishBtn.disabled = false;
 }
 
-const SIZE_LABELS = { "": "Small", wide: "Wide", tall: "Tall", big: "Big" };
-
-let keyCounter = 0;
-function keyFor(photo) {
-  if (!photo.__key) {
-    Object.defineProperty(photo, "__key", { value: `k${keyCounter++}`, enumerable: false });
-  }
-  return photo.__key;
+function markTracksDirty() {
+  tracksDirty = true;
+  publishBtn.disabled = false;
 }
 
-function render() {
+let keyCounter = 0;
+function keyFor(item) {
+  if (!item.__key) {
+    Object.defineProperty(item, "__key", { value: `k${keyCounter++}`, enumerable: false });
+  }
+  return item.__key;
+}
+
+// ---- Generic drag-reorder + FLIP helpers, shared by the photo grid and track list ----
+
+// Animates items currently in `container` from their pre-mutation positions
+// to their post-mutation positions (FLIP technique), without touching any
+// DOM node that doesn't need to move — so dragging/resizing stays smooth
+// (no flicker, no lost native-drag state on the moved node).
+function withFlip(container, itemSelector, mutateFn) {
+  const items = Array.from(container.querySelectorAll(itemSelector));
+  const firstRects = new Map();
+  items.forEach((item) => firstRects.set(item, item.getBoundingClientRect()));
+
+  mutateFn();
+
+  container.querySelectorAll(itemSelector).forEach((item) => {
+    const first = firstRects.get(item);
+    if (!first) return;
+    const last = item.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (!dx && !dy) return;
+    item.style.transition = "none";
+    item.style.transform = `translate(${dx}px, ${dy}px)`;
+    requestAnimationFrame(() => {
+      item.style.transition = "transform 0.2s ease";
+      item.style.transform = "";
+    });
+  });
+}
+
+// Re-renders via renderFn (rebuilding innerHTML), matching items across the
+// rebuild by their stable data-key so the FLIP animation still works for
+// structural changes (add/remove) that withFlip can't handle in place.
+function renderWithFlip(container, keyedSelector, renderFn) {
+  const firstRects = new Map();
+  container.querySelectorAll(keyedSelector).forEach((item) => {
+    firstRects.set(item.dataset.key, item.getBoundingClientRect());
+  });
+
+  renderFn();
+
+  container.querySelectorAll(keyedSelector).forEach((item) => {
+    const first = firstRects.get(item.dataset.key);
+    if (!first) return;
+    const last = item.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (!dx && !dy) return;
+    item.style.transition = "none";
+    item.style.transform = `translate(${dx}px, ${dy}px)`;
+    requestAnimationFrame(() => {
+      item.style.transition = "transform 0.2s ease";
+      item.style.transform = "";
+    });
+  });
+}
+
+function closestIndexToPoint(container, itemSelector, x, y) {
+  let closest = null;
+  let closestDist = Infinity;
+  container.querySelectorAll(itemSelector).forEach((item) => {
+    const rect = item.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dist = (x - cx) ** 2 + (y - cy) ** 2;
+    if (dist < closestDist) {
+      closestDist = dist;
+      closest = Number(item.dataset.index);
+    }
+  });
+  return closest;
+}
+
+// Moves the dragged item's actual DOM node next to its new neighbor (instead
+// of rebuilding the list/grid), then re-numbers data-index attributes.
+function moveItemInDom(container, itemSelector, fromIndex, toIndex) {
+  withFlip(container, itemSelector, () => {
+    const items = Array.from(container.querySelectorAll(itemSelector));
+    const draggedItem = items[fromIndex];
+    const referenceItem = items[toIndex];
+    if (fromIndex < toIndex) {
+      container.insertBefore(draggedItem, referenceItem.nextSibling);
+    } else {
+      container.insertBefore(draggedItem, referenceItem);
+    }
+    container.querySelectorAll(itemSelector).forEach((item, i) => {
+      item.dataset.index = i;
+    });
+  });
+}
+
+// Wires native HTML5 drag-and-drop reordering onto `container` for children
+// matching `itemSelector`, using event delegation so it keeps working across
+// re-renders without rebinding. `onReorder(fromIndex, toIndex)` should update
+// the underlying data array; the DOM move + animation happen here.
+function makeSortable(container, itemSelector, onReorder) {
+  let draggedIndex = null;
+  let dragoverPending = false;
+  let lastDragoverEvent = null;
+
+  container.addEventListener("dragstart", (e) => {
+    const item = e.target.closest(itemSelector);
+    if (!item) return;
+    draggedIndex = Number(item.dataset.index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", item.dataset.index);
+    requestAnimationFrame(() => item.classList.add("dragging"));
+  });
+
+  container.addEventListener("dragend", (e) => {
+    const item = e.target.closest(itemSelector);
+    if (item) item.classList.remove("dragging");
+    draggedIndex = null;
+  });
+
+  container.addEventListener("dragover", (e) => {
+    if (draggedIndex === null) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    lastDragoverEvent = e;
+    if (dragoverPending) return;
+    dragoverPending = true;
+    requestAnimationFrame(() => {
+      dragoverPending = false;
+      if (draggedIndex === null) return;
+
+      const targetItem = lastDragoverEvent.target.closest(itemSelector);
+      const targetIndex = targetItem
+        ? Number(targetItem.dataset.index)
+        : closestIndexToPoint(container, itemSelector, lastDragoverEvent.clientX, lastDragoverEvent.clientY);
+
+      if (targetIndex === null || targetIndex === draggedIndex) return;
+      onReorder(draggedIndex, targetIndex);
+      moveItemInDom(container, itemSelector, draggedIndex, targetIndex);
+      draggedIndex = targetIndex;
+    });
+  });
+
+  container.addEventListener("drop", (e) => e.preventDefault());
+}
+
+// ---- Photos ----
+
+const SIZE_LABELS = { "": "Small", wide: "Wide", tall: "Tall", big: "Big" };
+
+function renderPhotos() {
   photoGrid.innerHTML = photos
     .map((p, i) => {
       const size = p.size && p.size !== "small" ? p.size : "";
@@ -95,7 +250,7 @@ function render() {
   photoGrid.querySelectorAll(".caption-input").forEach((input) => {
     input.addEventListener("input", (e) => {
       photos[Number(e.target.dataset.index)].alt = e.target.value;
-      markDirty();
+      markPhotosDirty();
     });
   });
 
@@ -108,8 +263,8 @@ function render() {
       } else {
         delete photos[idx].size;
       }
-      markDirty();
-      withFlip(() => {
+      markPhotosDirty();
+      withFlip(photoGrid, ".admin-photo-card[data-index]", () => {
         const card = photoGrid.querySelector(`.admin-photo-card[data-index="${idx}"]`);
         card.classList.remove("size-wide", "size-tall", "size-big");
         if (value) card.classList.add(`size-${value}`);
@@ -120,166 +275,94 @@ function render() {
   photoGrid.querySelectorAll(".delete-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       photos.splice(Number(e.target.dataset.index), 1);
-      markDirty();
-      renderWithFlip();
-    });
-  });
-
-  photoGrid.querySelectorAll(".admin-photo-card").forEach((card) => {
-    card.addEventListener("dragstart", (e) => {
-      draggedIndex = Number(card.dataset.index);
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", card.dataset.index);
-      requestAnimationFrame(() => card.classList.add("dragging"));
-    });
-    card.addEventListener("dragend", () => {
-      draggedIndex = null;
-      card.classList.remove("dragging");
+      markPhotosDirty();
+      renderWithFlip(photoGrid, ".admin-photo-card[data-key]", renderPhotos);
     });
   });
 }
 
-// Animates the cards currently in the grid from their pre-mutation positions
-// to their post-mutation positions (FLIP technique), without touching any
-// DOM node that doesn't need to move — used for in-place reorders/resizes
-// so dragging stays smooth (no image flicker, no lost drag state).
-function withFlip(mutateFn) {
-  const cards = Array.from(photoGrid.querySelectorAll(".admin-photo-card[data-index]"));
-  const firstRects = new Map();
-  cards.forEach((card) => firstRects.set(card, card.getBoundingClientRect()));
-
-  mutateFn();
-
-  photoGrid.querySelectorAll(".admin-photo-card[data-index]").forEach((card) => {
-    const first = firstRects.get(card);
-    if (!first) return;
-    const last = card.getBoundingClientRect();
-    const dx = first.left - last.left;
-    const dy = first.top - last.top;
-    if (!dx && !dy) return;
-    card.style.transition = "none";
-    card.style.transform = `translate(${dx}px, ${dy}px)`;
-    requestAnimationFrame(() => {
-      card.style.transition = "transform 0.2s ease";
-      card.style.transform = "";
-    });
-  });
-}
-
-// Re-renders the grid from scratch, matching cards across the rebuild by
-// their stable key so the FLIP animation still works for structural changes
-// (add/remove) that withFlip can't handle in place.
-function renderWithFlip() {
-  const firstRects = new Map();
-  photoGrid.querySelectorAll(".admin-photo-card[data-key]").forEach((card) => {
-    firstRects.set(card.dataset.key, card.getBoundingClientRect());
-  });
-
-  render();
-
-  photoGrid.querySelectorAll(".admin-photo-card[data-key]").forEach((card) => {
-    const first = firstRects.get(card.dataset.key);
-    if (!first) return;
-    const last = card.getBoundingClientRect();
-    const dx = first.left - last.left;
-    const dy = first.top - last.top;
-    if (!dx && !dy) return;
-    card.style.transition = "none";
-    card.style.transform = `translate(${dx}px, ${dy}px)`;
-    requestAnimationFrame(() => {
-      card.style.transition = "transform 0.2s ease";
-      card.style.transform = "";
-    });
-  });
-}
-
-function closestIndexToPoint(x, y) {
-  let closest = null;
-  let closestDist = Infinity;
-  photoGrid.querySelectorAll(".admin-photo-card[data-index]").forEach((card) => {
-    const rect = card.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const dist = (x - cx) ** 2 + (y - cy) ** 2;
-    if (dist < closestDist) {
-      closestDist = dist;
-      closest = Number(card.dataset.index);
-    }
-  });
-  return closest;
-}
-
-// Moves the dragged card's actual DOM node next to its new neighbor (instead
-// of rebuilding the grid), then re-numbers data-index attributes to match.
-// Keeping the same nodes alive is what stops images from flickering and
-// keeps the browser's native drag state attached to the right element.
-function moveCardInDom(fromIndex, toIndex) {
-  withFlip(() => {
-    const cards = Array.from(photoGrid.querySelectorAll(".admin-photo-card[data-index]"));
-    const draggedCard = cards[fromIndex];
-    const referenceCard = cards[toIndex];
-    if (fromIndex < toIndex) {
-      photoGrid.insertBefore(draggedCard, referenceCard.nextSibling);
-    } else {
-      photoGrid.insertBefore(draggedCard, referenceCard);
-    }
-    photoGrid.querySelectorAll(".admin-photo-card[data-index]").forEach((card, i) => {
-      card.dataset.index = i;
-    });
-  });
-}
-
-let dragoverPending = false;
-let lastDragoverEvent = null;
-
-photoGrid.addEventListener("dragover", (e) => {
-  if (draggedIndex === null) return;
-  e.preventDefault();
-  e.dataTransfer.dropEffect = "move";
-  lastDragoverEvent = e;
-  if (dragoverPending) return;
-  dragoverPending = true;
-  requestAnimationFrame(() => {
-    dragoverPending = false;
-    if (draggedIndex === null) return;
-
-    const targetCard = lastDragoverEvent.target.closest(".admin-photo-card[data-index]");
-    const targetIndex = targetCard
-      ? Number(targetCard.dataset.index)
-      : closestIndexToPoint(lastDragoverEvent.clientX, lastDragoverEvent.clientY);
-
-    if (targetIndex === null || targetIndex === draggedIndex) return;
-    const [moved] = photos.splice(draggedIndex, 1);
-    photos.splice(targetIndex, 0, moved);
-    moveCardInDom(draggedIndex, targetIndex);
-    draggedIndex = targetIndex;
-    markDirty();
-  });
+makeSortable(photoGrid, ".admin-photo-card[data-index]", (from, to) => {
+  const [moved] = photos.splice(from, 1);
+  photos.splice(to, 0, moved);
+  markPhotosDirty();
 });
 
-photoGrid.addEventListener("drop", (e) => {
-  e.preventDefault();
+// ---- Music ----
+
+function renderTracks() {
+  trackList.innerHTML = tracks
+    .map(
+      (t, i) => `
+    <div class="track-row" draggable="true" data-index="${i}" data-key="${keyFor(t)}">
+      <span class="track-handle" aria-hidden="true">&#9776;</span>
+      <input type="text" value="${escapeHtml(t.title || "")}" placeholder="Title" data-index="${i}" class="track-title-input" />
+      <input type="text" value="${escapeHtml(t.artist || "")}" placeholder="Artist" data-index="${i}" class="track-artist-input" />
+      <button class="delete-btn" data-index="${i}" title="Delete">&times;</button>
+    </div>`
+    )
+    .join("");
+
+  trackList.querySelectorAll(".track-title-input").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      tracks[Number(e.target.dataset.index)].title = e.target.value;
+      markTracksDirty();
+    });
+  });
+
+  trackList.querySelectorAll(".track-artist-input").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      tracks[Number(e.target.dataset.index)].artist = e.target.value;
+      markTracksDirty();
+    });
+  });
+
+  trackList.querySelectorAll(".delete-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      tracks.splice(Number(e.target.dataset.index), 1);
+      markTracksDirty();
+      renderWithFlip(trackList, ".track-row[data-key]", renderTracks);
+    });
+  });
+}
+
+makeSortable(trackList, ".track-row[data-index]", (from, to) => {
+  const [moved] = tracks.splice(from, 1);
+  tracks.splice(to, 0, moved);
+  markTracksDirty();
 });
+
+// ---- Load / login / logout ----
+
+async function loadJsonFile(path) {
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+    headers: githubHeaders(),
+  });
+  if (!res.ok) throw new Error(`Couldn't load ${path} (${res.status})`);
+  const data = await res.json();
+  const parsed = JSON.parse(b64DecodeUnicode(data.content.replace(/\n/g, "")));
+  return { parsed, sha: data.sha };
+}
 
 async function loadPhotos() {
-  const res = await fetch(
-    `https://api.github.com/repos/${GITHUB_REPO}/contents/${PHOTOS_PATH}`,
-    { headers: githubHeaders() }
-  );
-  if (!res.ok) throw new Error(`Couldn't load ${PHOTOS_PATH} (${res.status})`);
-  const data = await res.json();
-  fileSha = data.sha;
-  const parsed = JSON.parse(b64DecodeUnicode(data.content.replace(/\n/g, "")));
+  const { parsed, sha } = await loadJsonFile(PHOTOS_PATH);
+  photosSha = sha;
   photos = Array.isArray(parsed.photos) ? parsed.photos : [];
-  render();
+  renderPhotos();
+}
+
+async function loadTracks() {
+  const { parsed, sha } = await loadJsonFile(PLAYLIST_PATH);
+  playlistSha = sha;
+  tracks = Array.isArray(parsed.tracks) ? parsed.tracks : [];
+  renderTracks();
 }
 
 async function enterManager() {
   loginView.hidden = true;
   managerView.hidden = false;
-  setStatus("Loading photos…");
+  setStatus("Loading…");
   try {
-    await loadPhotos();
+    await Promise.all([loadPhotos(), loadTracks()]);
     setStatus("");
   } catch (err) {
     setStatus(`Error: ${err.message}`);
@@ -317,20 +400,29 @@ logoutBtn.addEventListener("click", () => {
   MarshuxAuth.clearToken();
   token = null;
   photos = [];
-  fileSha = null;
-  dirty = false;
+  tracks = [];
+  photosSha = null;
+  playlistSha = null;
+  photosDirty = false;
+  tracksDirty = false;
   managerView.hidden = true;
   loginView.hidden = false;
   if (window.MarshuxAuthNav) window.MarshuxAuthNav.refresh();
 });
 
-async function uploadOne(file) {
+// ---- Upload ----
+
+async function signUpload() {
   const signRes = await fetch(`${WORKER_URL}/sign-upload`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!signRes.ok) throw new Error("Not authorized to upload.");
-  const { signature, timestamp, api_key, cloud_name } = await signRes.json();
+  return signRes.json();
+}
+
+async function uploadToCloudinary(file, resourceType) {
+  const { signature, timestamp, api_key, cloud_name } = await signUpload();
 
   const form = new FormData();
   form.append("file", file);
@@ -338,7 +430,7 @@ async function uploadOne(file) {
   form.append("timestamp", timestamp);
   form.append("signature", signature);
 
-  const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
+  const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/${resourceType}/upload`, {
     method: "POST",
     body: form,
   });
@@ -362,7 +454,7 @@ async function handleFiles(fileList) {
     return el;
   });
 
-  const results = await Promise.allSettled(files.map((file) => uploadOne(file)));
+  const results = await Promise.allSettled(files.map((file) => uploadToCloudinary(file, "image")));
 
   const errors = [];
   results.forEach((result, i) => {
@@ -375,9 +467,44 @@ async function handleFiles(fileList) {
   });
 
   if (results.some((r) => r.status === "fulfilled")) {
-    markDirty();
+    markPhotosDirty();
   }
-  renderWithFlip();
+  renderWithFlip(photoGrid, ".admin-photo-card[data-key]", renderPhotos);
+  setStatus(errors.length ? errors.join(" | ") : "");
+}
+
+function titleFromFilename(name) {
+  return name.replace(/\.[^/.]+$/, "");
+}
+
+async function handleMusicFiles(fileList) {
+  const files = Array.from(fileList).filter((f) => f.type.startsWith("audio/"));
+  if (files.length === 0) return;
+
+  const placeholders = files.map((file) => {
+    const el = document.createElement("div");
+    el.className = "track-row uploading";
+    el.textContent = `Uploading ${file.name}…`;
+    trackList.prepend(el);
+    return el;
+  });
+
+  const results = await Promise.allSettled(files.map((file) => uploadToCloudinary(file, "video")));
+
+  const errors = [];
+  results.forEach((result, i) => {
+    placeholders[i].remove();
+    if (result.status === "fulfilled") {
+      tracks.push({ title: titleFromFilename(files[i].name), artist: "", url: result.value });
+    } else {
+      errors.push(`${files[i].name}: ${result.reason.message}`);
+    }
+  });
+
+  if (results.some((r) => r.status === "fulfilled")) {
+    markTracksDirty();
+  }
+  renderWithFlip(trackList, ".track-row[data-key]", renderTracks);
   setStatus(errors.length ? errors.join(" | ") : "");
 }
 
@@ -397,31 +524,56 @@ fileInput.addEventListener("change", (e) => handleFiles(e.target.files));
 );
 dropzone.addEventListener("drop", (e) => handleFiles(e.dataTransfer.files));
 
+musicFileInput.addEventListener("change", (e) => handleMusicFiles(e.target.files));
+
+["dragenter", "dragover"].forEach((evt) =>
+  musicDropzone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    musicDropzone.classList.add("dragover");
+  })
+);
+["dragleave", "drop"].forEach((evt) =>
+  musicDropzone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    musicDropzone.classList.remove("dragover");
+  })
+);
+musicDropzone.addEventListener("drop", (e) => handleMusicFiles(e.dataTransfer.files));
+
+// ---- Publish ----
+
+async function publishFile(path, sha, body) {
+  const content = b64EncodeUnicode(JSON.stringify(body, null, 2));
+  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
+    method: "PUT",
+    headers: githubHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({
+      message: "Update via admin panel",
+      content,
+      sha,
+      branch: "main",
+    }),
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody.message || `GitHub responded ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content.sha;
+}
+
 publishBtn.addEventListener("click", async () => {
   publishBtn.disabled = true;
   setStatus("Publishing…");
   try {
-    const content = b64EncodeUnicode(JSON.stringify({ photos }, null, 2));
-    const res = await fetch(
-      `https://api.github.com/repos/${GITHUB_REPO}/contents/${PHOTOS_PATH}`,
-      {
-        method: "PUT",
-        headers: githubHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({
-          message: "Update photos via admin panel",
-          content,
-          sha: fileSha,
-          branch: "main",
-        }),
-      }
-    );
-    if (!res.ok) {
-      const errBody = await res.json().catch(() => ({}));
-      throw new Error(errBody.message || `GitHub responded ${res.status}`);
+    if (photosDirty) {
+      photosSha = await publishFile(PHOTOS_PATH, photosSha, { photos });
+      photosDirty = false;
     }
-    const data = await res.json();
-    fileSha = data.content.sha;
-    dirty = false;
+    if (tracksDirty) {
+      playlistSha = await publishFile(PLAYLIST_PATH, playlistSha, { tracks });
+      tracksDirty = false;
+    }
     setStatus("Published! The live site will update shortly. Returning to the homepage…");
     setTimeout(() => {
       window.location.href = "../";
