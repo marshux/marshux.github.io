@@ -188,6 +188,10 @@ function makeSortable(container, itemSelector, onReorder) {
   let lastDragoverEvent = null;
 
   container.addEventListener("dragstart", (e) => {
+    if (e.target.closest("input, textarea, select, button")) {
+      e.preventDefault();
+      return;
+    }
     const item = e.target.closest(itemSelector);
     if (!item) return;
     draggedIndex = Number(item.dataset.index);
