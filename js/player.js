@@ -1,4 +1,8 @@
 const PLAYER_STATE_KEY = "marshux-player-state";
+// Caps how loud the slider can go, as a fraction of each track's original
+// volume — dragging the slider all the way up still only reaches half
+// volume, since full volume was too loud in practice.
+const MAX_VOLUME = 0.5;
 
 function loadPlayerState() {
   try {
@@ -56,8 +60,9 @@ async function initPlayer() {
   const wantsPlaying = Boolean(savedState.playing);
   const resumeAt = typeof savedState.currentTime === "number" ? savedState.currentTime : 0;
   audio.muted = Boolean(savedState.muted);
-  audio.volume = typeof savedState.volume === "number" ? savedState.volume : 0.5;
-  volumeSlider.value = String(Math.round(audio.volume * 100));
+  const savedSliderFraction = typeof savedState.volume === "number" ? savedState.volume : 0.5;
+  audio.volume = savedSliderFraction * MAX_VOLUME;
+  volumeSlider.value = String(Math.round(savedSliderFraction * 100));
 
   function updateTrackInfo() {
     const track = tracks[index];
@@ -105,7 +110,7 @@ async function initPlayer() {
       currentTime: audio.currentTime || 0,
       playing: !audio.paused,
       muted: audio.muted,
-      volume: audio.volume,
+      volume: Number(volumeSlider.value) / 100,
     });
   }
 
@@ -151,7 +156,7 @@ async function initPlayer() {
   });
 
   volumeSlider.addEventListener("input", () => {
-    audio.volume = Number(volumeSlider.value) / 100;
+    audio.volume = (Number(volumeSlider.value) / 100) * MAX_VOLUME;
     persist();
   });
 

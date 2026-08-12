@@ -556,6 +556,7 @@ main {
 
 .player-volume input[type="range"] {
   flex: 1;
+  min-width: 0;
   height: 4px;
   accent-color: var(--accent);
   cursor: pointer;
