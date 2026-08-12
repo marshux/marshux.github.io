@@ -51,6 +51,10 @@ async function initPlayer() {
   const volumeSlider = document.getElementById("player-volume-slider");
   const queueToggleBtn = document.getElementById("player-queue-toggle");
   const queueList = document.getElementById("player-queue");
+  const seekSlider = document.getElementById("player-seek-slider");
+  const currentTimeEl = document.getElementById("player-current-time");
+  const durationEl = document.getElementById("player-duration");
+  let isSeeking = false;
 
   const savedState = loadPlayerState();
   let index =
@@ -78,6 +82,21 @@ async function initPlayer() {
   function updateMuteIcon() {
     muteBtn.classList.toggle("is-muted", audio.muted);
     muteBtn.setAttribute("aria-label", audio.muted ? "Unmute" : "Mute");
+  }
+
+  function formatTime(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  function updateSeekUI() {
+    if (isSeeking) return;
+    const duration = audio.duration || 0;
+    seekSlider.value = duration ? String((audio.currentTime / duration) * 100) : "0";
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+    durationEl.textContent = formatTime(duration);
   }
 
   function renderQueue() {
@@ -120,6 +139,7 @@ async function initPlayer() {
     audio.load(); // force the element to actually drop the old source and reload
     updateTrackInfo();
     updateQueueActive();
+    updateSeekUI();
     if (startAt) {
       audio.addEventListener(
         "loadedmetadata",
@@ -165,6 +185,18 @@ async function initPlayer() {
     queueList.hidden = !queueList.hidden;
   });
 
+  seekSlider.addEventListener("input", () => {
+    isSeeking = true;
+    const duration = audio.duration || 0;
+    currentTimeEl.textContent = formatTime((Number(seekSlider.value) / 100) * duration);
+  });
+  seekSlider.addEventListener("change", () => {
+    const duration = audio.duration || 0;
+    audio.currentTime = (Number(seekSlider.value) / 100) * duration;
+    isSeeking = false;
+    persist();
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
 
@@ -190,7 +222,11 @@ async function initPlayer() {
     persist();
   });
   audio.addEventListener("ended", () => loadTrack(index + 1, { autoplay: true }));
-  audio.addEventListener("timeupdate", persist);
+  audio.addEventListener("timeupdate", () => {
+    persist();
+    updateSeekUI();
+  });
+  audio.addEventListener("loadedmetadata", updateSeekUI);
 
   window.addEventListener("pagehide", persist);
   document.addEventListener("visibilitychange", () => {

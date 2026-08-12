@@ -5,7 +5,7 @@
 // <main> and are never touched, so playback survives navigation instead of
 // restarting from a fresh document every click.
 (function () {
-  const SWAPPABLE_PATHS = new Set(["/", "/index.html", "/interests.html", "/projects.html", "/photography.html"]);
+  const SWAPPABLE_PATHS = new Set(["/", "/index.html", "/projects.html", "/photography.html"]);
 
   let navToken = 0;
 
