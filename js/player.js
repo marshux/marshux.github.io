@@ -1,8 +1,8 @@
 const PLAYER_STATE_KEY = "marshux-player-state";
 // Caps how loud the slider can go, as a fraction of each track's original
-// volume — dragging the slider all the way up still only reaches half
-// volume, since full volume was too loud in practice.
-const MAX_VOLUME = 0.5;
+// volume — dragging the slider all the way up still only reaches a quarter
+// of full volume, since louder settings were too loud in practice.
+const MAX_VOLUME = 0.25;
 
 function loadPlayerState() {
   try {
