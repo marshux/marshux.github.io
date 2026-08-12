@@ -402,8 +402,6 @@ loginBtn.addEventListener("click", async () => {
     await init();
   } catch (err) {
     loginStatus.textContent = err.message;
-  } finally {
-    if (window.MarshuxAuthNav) window.MarshuxAuthNav.refresh();
   }
 });
 
@@ -418,7 +416,6 @@ logoutBtn.addEventListener("click", () => {
   tracksDirty = false;
   managerView.hidden = true;
   loginView.hidden = false;
-  if (window.MarshuxAuthNav) window.MarshuxAuthNav.refresh();
 });
 
 // ---- Upload ----

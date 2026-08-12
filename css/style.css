@@ -56,7 +56,6 @@ body {
   color: var(--fg);
   font-family: var(--font-body);
   line-height: 1.6;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 a {
