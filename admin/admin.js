@@ -109,7 +109,11 @@ function render() {
         delete photos[idx].size;
       }
       markDirty();
-      renderWithFlip();
+      withFlip(() => {
+        const card = photoGrid.querySelector(`.admin-photo-card[data-index="${idx}"]`);
+        card.classList.remove("size-wide", "size-tall", "size-big");
+        if (value) card.classList.add(`size-${value}`);
+      });
     });
   });
 
@@ -130,28 +134,50 @@ function render() {
     });
     card.addEventListener("dragend", () => {
       draggedIndex = null;
-      photoGrid.querySelectorAll(".admin-photo-card").forEach((c) => c.classList.remove("dragging"));
+      card.classList.remove("dragging");
     });
   });
-
-  if (draggedIndex !== null) {
-    const draggedCard = photoGrid.querySelector(`.admin-photo-card[data-index="${draggedIndex}"]`);
-    if (draggedCard) draggedCard.classList.add("dragging");
-  }
 }
 
-// Re-renders the grid while smoothly animating any card that moved to its
-// new position (FLIP technique), so reordering/resizing reads as a live
-// shift instead of an instant jump.
+// Animates the cards currently in the grid from their pre-mutation positions
+// to their post-mutation positions (FLIP technique), without touching any
+// DOM node that doesn't need to move — used for in-place reorders/resizes
+// so dragging stays smooth (no image flicker, no lost drag state).
+function withFlip(mutateFn) {
+  const cards = Array.from(photoGrid.querySelectorAll(".admin-photo-card[data-index]"));
+  const firstRects = new Map();
+  cards.forEach((card) => firstRects.set(card, card.getBoundingClientRect()));
+
+  mutateFn();
+
+  photoGrid.querySelectorAll(".admin-photo-card[data-index]").forEach((card) => {
+    const first = firstRects.get(card);
+    if (!first) return;
+    const last = card.getBoundingClientRect();
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    if (!dx && !dy) return;
+    card.style.transition = "none";
+    card.style.transform = `translate(${dx}px, ${dy}px)`;
+    requestAnimationFrame(() => {
+      card.style.transition = "transform 0.2s ease";
+      card.style.transform = "";
+    });
+  });
+}
+
+// Re-renders the grid from scratch, matching cards across the rebuild by
+// their stable key so the FLIP animation still works for structural changes
+// (add/remove) that withFlip can't handle in place.
 function renderWithFlip() {
   const firstRects = new Map();
-  photoGrid.querySelectorAll(".admin-photo-card").forEach((card) => {
+  photoGrid.querySelectorAll(".admin-photo-card[data-key]").forEach((card) => {
     firstRects.set(card.dataset.key, card.getBoundingClientRect());
   });
 
   render();
 
-  photoGrid.querySelectorAll(".admin-photo-card").forEach((card) => {
+  photoGrid.querySelectorAll(".admin-photo-card[data-key]").forEach((card) => {
     const first = firstRects.get(card.dataset.key);
     if (!first) return;
     const last = card.getBoundingClientRect();
@@ -161,7 +187,7 @@ function renderWithFlip() {
     card.style.transition = "none";
     card.style.transform = `translate(${dx}px, ${dy}px)`;
     requestAnimationFrame(() => {
-      card.style.transition = "transform 0.25s ease";
+      card.style.transition = "transform 0.2s ease";
       card.style.transform = "";
     });
   });
@@ -183,22 +209,52 @@ function closestIndexToPoint(x, y) {
   return closest;
 }
 
+// Moves the dragged card's actual DOM node next to its new neighbor (instead
+// of rebuilding the grid), then re-numbers data-index attributes to match.
+// Keeping the same nodes alive is what stops images from flickering and
+// keeps the browser's native drag state attached to the right element.
+function moveCardInDom(fromIndex, toIndex) {
+  withFlip(() => {
+    const cards = Array.from(photoGrid.querySelectorAll(".admin-photo-card[data-index]"));
+    const draggedCard = cards[fromIndex];
+    const referenceCard = cards[toIndex];
+    if (fromIndex < toIndex) {
+      photoGrid.insertBefore(draggedCard, referenceCard.nextSibling);
+    } else {
+      photoGrid.insertBefore(draggedCard, referenceCard);
+    }
+    photoGrid.querySelectorAll(".admin-photo-card[data-index]").forEach((card, i) => {
+      card.dataset.index = i;
+    });
+  });
+}
+
+let dragoverPending = false;
+let lastDragoverEvent = null;
+
 photoGrid.addEventListener("dragover", (e) => {
   if (draggedIndex === null) return;
   e.preventDefault();
   e.dataTransfer.dropEffect = "move";
+  lastDragoverEvent = e;
+  if (dragoverPending) return;
+  dragoverPending = true;
+  requestAnimationFrame(() => {
+    dragoverPending = false;
+    if (draggedIndex === null) return;
 
-  const targetCard = e.target.closest(".admin-photo-card[data-index]");
-  const targetIndex = targetCard
-    ? Number(targetCard.dataset.index)
-    : closestIndexToPoint(e.clientX, e.clientY);
+    const targetCard = lastDragoverEvent.target.closest(".admin-photo-card[data-index]");
+    const targetIndex = targetCard
+      ? Number(targetCard.dataset.index)
+      : closestIndexToPoint(lastDragoverEvent.clientX, lastDragoverEvent.clientY);
 
-  if (targetIndex === null || targetIndex === draggedIndex) return;
-  const [moved] = photos.splice(draggedIndex, 1);
-  photos.splice(targetIndex, 0, moved);
-  draggedIndex = targetIndex;
-  markDirty();
-  renderWithFlip();
+    if (targetIndex === null || targetIndex === draggedIndex) return;
+    const [moved] = photos.splice(draggedIndex, 1);
+    photos.splice(targetIndex, 0, moved);
+    moveCardInDom(draggedIndex, targetIndex);
+    draggedIndex = targetIndex;
+    markDirty();
+  });
 });
 
 photoGrid.addEventListener("drop", (e) => {
