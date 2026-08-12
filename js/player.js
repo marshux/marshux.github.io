@@ -164,6 +164,22 @@ async function initPlayer() {
     queueList.hidden = !queueList.hidden;
   });
 
+  document.addEventListener("keydown", (e) => {
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+
+    const t = e.target;
+    const isTyping =
+      t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable);
+    if (isTyping) return;
+
+    if (e.code === "Space" || e.key === " ") {
+      e.preventDefault();
+      toggleBtn.click();
+    } else if (e.key === "m" || e.key === "M") {
+      muteBtn.click();
+    }
+  });
+
   audio.addEventListener("play", () => {
     updateToggleIcon();
     persist();
