@@ -39,27 +39,34 @@
 
       <p id="status-log" class="admin-status"></p>
 
-      <h2 class="admin-section-title">Photos</h2>
-      <div id="dropzone" class="dropzone">
-        <p>Drag &amp; drop photos here, or</p>
-        <label class="btn btn-secondary">
-          Choose files
-          <input id="file-input" type="file" accept="image/*" multiple hidden />
-        </label>
+      <div class="admin-tabs" role="tablist">
+        <button class="admin-tab active" type="button" role="tab" aria-selected="true" data-tab="photos-panel">Photos</button>
+        <button class="admin-tab" type="button" role="tab" aria-selected="false" data-tab="music-panel">Music</button>
       </div>
-      <p class="section-sub">Drag photos to reorder them. This grid matches the live collage layout &mdash; use the size dropdown on each photo to change its tile shape.</p>
-      <div id="admin-photo-grid" class="admin-photo-grid"></div>
 
-      <h2 class="admin-section-title">Music</h2>
-      <div id="music-dropzone" class="dropzone">
-        <p>Drag &amp; drop audio files here, or</p>
-        <label class="btn btn-secondary">
-          Choose files
-          <input id="music-file-input" type="file" accept="audio/*" multiple hidden />
-        </label>
+      <div id="photos-panel" class="admin-tab-panel">
+        <div id="dropzone" class="dropzone">
+          <p>Drag &amp; drop photos here, or</p>
+          <label class="btn btn-secondary">
+            Choose files
+            <input id="file-input" type="file" accept="image/*" multiple hidden />
+          </label>
+        </div>
+        <p class="section-sub">Drag photos to reorder them. This grid matches the live collage layout exactly &mdash; use the size dropdown on each photo (hover to reveal) to change its tile shape.</p>
+        <div id="admin-photo-grid" class="admin-photo-grid"></div>
       </div>
-      <p class="section-sub">Drag tracks to reorder the queue visitors hear. Edit title/artist inline.</p>
-      <div id="admin-track-list" class="admin-track-list"></div>
+
+      <div id="music-panel" class="admin-tab-panel" hidden>
+        <div id="music-dropzone" class="dropzone">
+          <p>Drag &amp; drop audio files here, or</p>
+          <label class="btn btn-secondary">
+            Choose files
+            <input id="music-file-input" type="file" accept="audio/*" multiple hidden />
+          </label>
+        </div>
+        <p class="section-sub">Drag tracks to reorder the queue visitors hear. Edit title/artist inline.</p>
+        <div id="admin-track-list" class="admin-track-list"></div>
+      </div>
     </section>
   </main>
 

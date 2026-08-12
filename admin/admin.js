@@ -19,6 +19,21 @@ const musicDropzone = document.getElementById("music-dropzone");
 const musicFileInput = document.getElementById("music-file-input");
 const trackList = document.getElementById("admin-track-list");
 
+document.querySelectorAll(".admin-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".admin-tab").forEach((t) => {
+      t.classList.remove("active");
+      t.setAttribute("aria-selected", "false");
+    });
+    document.querySelectorAll(".admin-tab-panel").forEach((panel) => {
+      panel.hidden = true;
+    });
+    tab.classList.add("active");
+    tab.setAttribute("aria-selected", "true");
+    document.getElementById(tab.dataset.tab).hidden = false;
+  });
+});
+
 let token = MarshuxAuth.getToken();
 let photos = [];
 let tracks = [];

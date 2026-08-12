@@ -59,21 +59,50 @@
   color: var(--fg);
 }
 
+.admin-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.admin-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 4px;
+  margin-right: 24px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+}
+
+.admin-tab:hover {
+  color: var(--fg);
+}
+
+.admin-tab.active {
+  color: var(--fg);
+  border-bottom-color: var(--accent);
+}
+
+/* Same grid metrics as .photo-grid on the live site, so this is a true
+   WYSIWYG preview of the published collage layout. */
 .admin-photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  grid-auto-rows: 220px;
-  gap: 12px;
-  margin-top: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-auto-rows: 140px;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .admin-photo-card {
+  position: relative;
   background: var(--bg-alt);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
   cursor: grab;
 }
 
@@ -95,83 +124,89 @@
 }
 
 .admin-photo-card img {
-  flex: 1;
-  min-height: 0;
   width: 100%;
+  height: 100%;
   object-fit: cover;
   display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-sizing: border-box;
 }
 
+/* Editing controls float on top of the thumbnail (shown on hover/focus)
+   instead of adding height, so the card's shape always matches its
+   published tile size exactly. */
 .admin-photo-card .card-body {
-  flex: 0 0 auto;
-  padding: 8px 10px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
+  padding: 8px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0));
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.admin-photo-card:hover .card-body,
+.admin-photo-card:focus-within .card-body {
+  opacity: 1;
 }
 
 .admin-photo-card .card-body-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
 .admin-photo-card input[type="text"] {
   width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
-  color: var(--fg);
-  padding: 6px 8px;
-  font-size: 0.85rem;
+  color: #fff;
+  padding: 4px 6px;
+  font-size: 0.75rem;
 }
 
 .admin-photo-card select {
   flex: 1;
   min-width: 0;
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
-  color: var(--fg);
-  padding: 6px 8px;
-  font-size: 0.8rem;
+  color: #fff;
+  padding: 4px 6px;
+  font-size: 0.72rem;
 }
 
 .admin-photo-card .delete-btn {
   flex: 0 0 auto;
-  background: none;
-  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 6px;
-  color: var(--fg-muted);
+  color: #fff;
   cursor: pointer;
-  padding: 0 10px;
-  font-size: 0.9rem;
+  padding: 3px 8px;
+  font-size: 0.8rem;
 }
 
 .admin-photo-card .delete-btn:hover {
-  color: #d5544a;
-  border-color: #d5544a;
+  color: #ff8478;
+  border-color: #ff8478;
 }
 
 .admin-photo-card.uploading {
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
+  border: 1px solid var(--border);
   color: var(--fg-muted);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   text-align: center;
-  padding: 12px;
-}
-
-.admin-section-title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.2rem;
-  margin: 40px 0 12px;
-}
-
-.admin-main h2.admin-section-title:first-of-type {
-  margin-top: 0;
+  padding: 8px;
 }
 
 .admin-track-list {
