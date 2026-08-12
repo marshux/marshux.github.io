@@ -78,8 +78,11 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
-  backdrop-filter: blur(8px);
+  /* No backdrop-filter: blur is one of the most expensive things a browser
+     can rasterize on a sticky element, and it dominated the cost of the
+     theme-toggle animation (and general scroll performance). A near-opaque
+     background gets most of the same look for near-zero cost. */
+  background: color-mix(in srgb, var(--bg) 97%, transparent);
   border-bottom: 1px solid var(--border);
 }
 
@@ -444,8 +447,7 @@ main {
   gap: 10px;
   width: 210px;
   padding: 14px 16px;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--bg) 97%, transparent);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
