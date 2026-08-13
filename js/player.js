@@ -233,10 +233,25 @@ async function initPlayer() {
     if (document.visibilityState === "hidden") persist();
   });
 
+  // Browsers block audio.play() on a fresh page load unless the user has
+  // already earned this origin autoplay permission (e.g. Chrome's media
+  // engagement heuristic after prior plays). When that initial play() above
+  // gets rejected, fall back to resuming on the very next interaction
+  // anywhere on the page, so a refresh mid-song picks back up on the first
+  // click/keypress instead of silently staying paused.
+  function resumeOnFirstInteraction() {
+    const resume = () => {
+      if (wantsPlaying && audio.paused) audio.play().catch(() => {});
+    };
+    document.addEventListener("pointerdown", resume, { once: true });
+    document.addEventListener("keydown", resume, { once: true });
+  }
+
   bar.hidden = false;
   updateMuteIcon();
   renderQueue();
   loadTrack(index, { autoplay: wantsPlaying, startAt: resumeAt });
+  if (wantsPlaying) resumeOnFirstInteraction();
   updateToggleIcon();
 }
 

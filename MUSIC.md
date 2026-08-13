@@ -23,11 +23,17 @@ of its image one.
 
 ## A note on cross-page playback
 
-The player remembers the current track, position, and mute state
-(`sessionStorage`) and tries to resume automatically as visitors move
-between pages. Browsers are conservative about autoplaying audio with sound,
-so that resume can silently fail to auto-start on some page loads &mdash;
-when that happens the player just stays paused at the same spot instead of
-picking back up on its own, and a visitor can hit play to continue. There's
-no reliable way to guarantee gapless playback across full page navigations
-on a static multi-page site.
+Clicking between pages (Me / Projects / Photography) never actually reloads
+&mdash; `js/router.js` swaps the page content in place and leaves the
+`<audio>` element alone, so playback is genuinely gapless there.
+
+A real page refresh or a fresh visit to a URL is a real reload, so the
+`<audio>` element does get recreated. The player remembers the current
+track, position, volume, and mute state (`sessionStorage`) and tries to
+resume automatically. Browsers block autoplay-with-sound on a fresh
+navigation unless the visitor has already earned this site autoplay
+permission (e.g. Chrome's media engagement heuristic), so that automatic
+resume can get silently blocked &mdash; when it does, the player falls back
+to resuming on the very next click or keypress anywhere on the page, so in
+practice it picks back up almost immediately rather than requiring the
+visitor to find and hit play themselves.
