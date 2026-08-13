@@ -163,5 +163,47 @@ async function loadPhotos() {
   }
 }
 
+// data/experience.json schema and how to add an entry: see EXPERIENCE.md.
+async function loadExperience() {
+  const list = document.getElementById("experience-list");
+  if (!list) return;
+
+  try {
+    const res = await fetch("data/experience.json");
+    if (!res.ok) throw new Error("no manifest");
+    const data = await res.json();
+    const roles = Array.isArray(data.roles) ? data.roles : [];
+
+    if (roles.length === 0) {
+      list.innerHTML = `<p class="empty-state">Professional history coming soon.</p>`;
+      return;
+    }
+
+    list.innerHTML = roles
+      .map((r) => {
+        const dateRange = [r.start, r.end].filter(Boolean).map(escapeHtml).join(" &ndash; ");
+        const tags = Array.isArray(r.tags) ? r.tags : [];
+        const tagsHtml = tags.length
+          ? `<div class="experience-tags">${tags.map((t) => `<span class="experience-tag">${escapeHtml(t)}</span>`).join("")}</div>`
+          : "";
+        const subtitle = [r.company, r.location].filter(Boolean).map(escapeHtml).join(" &middot; ");
+        return `
+      <article class="experience-item">
+        <div class="experience-dates">${dateRange}</div>
+        <div class="experience-body">
+          <h3>${escapeHtml(r.role || "Untitled role")}</h3>
+          ${subtitle ? `<p class="experience-company">${subtitle}</p>` : ""}
+          ${r.description ? `<p class="experience-desc">${escapeHtml(r.description)}</p>` : ""}
+          ${tagsHtml}
+        </div>
+      </article>`;
+      })
+      .join("");
+  } catch (err) {
+    list.innerHTML = `<p class="empty-state">Professional history coming soon.</p>`;
+  }
+}
+
 loadProjects();
 loadPhotos();
+loadExperience();

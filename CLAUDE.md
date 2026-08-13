@@ -6,10 +6,12 @@ serif headings, warm light/dark palette via CSS custom properties).
 
 ## Architecture
 
-- **Pages**: `index.html`, `projects.html`, `photography.html` (no
-  `interests.html` or `contact.html` — both were removed by request). Each
-  page includes shared chrome via `data-include="partials/*.html"`
-  (`js/include.js` fetches and injects them at runtime).
+- **Pages**: `index.html`, `experience.html`, `projects.html`,
+  `photography.html` (no `interests.html` or `contact.html` — both were
+  removed by request). Each page includes shared chrome via
+  `data-include="partials/*.html"` (`js/include.js` fetches and injects them
+  at runtime). The homepage also has a short editable About paragraph
+  (`.about` section in `index.html`, right below the hero).
 - **`js/router.js`**: intercepts same-origin clicks between the pages above
   and swaps `<main>` via `fetch` + `DOMParser` instead of a full page load
   (`history.pushState`/`popstate`). This is what lets the `<audio>` element
@@ -17,13 +19,15 @@ serif headings, warm light/dark palette via CSS custom properties).
   is intentionally excluded — real full page loads there.
 - **`js/main.js`**: theme toggle (View Transitions API, no CSS transition —
   see the "no backdrop-filter" comment in `css/style.css`, it was a real
-  performance bottleneck), nav highlighting, `loadProjects()`, `loadPhotos()`.
+  performance bottleneck), nav highlighting, `loadProjects()`, `loadPhotos()`,
+  `loadExperience()`.
 - **`js/player.js`**: the "Now Playing" widget (top-left, fixed position).
   State (track, position, volume, mute) persists to `sessionStorage` and
-  best-effort resumes on reload — browsers block autoplay-with-sound on a
-  fresh navigation without prior engagement, so there's a fallback that
-  resumes on the very next click/keypress anywhere on the page if the
-  initial `audio.play()` was rejected. See `MUSIC.md`.
+  best-effort resumes on reload — browsers can silently block
+  autoplay-with-sound on a fresh navigation, in which case the player just
+  stays paused at the same spot rather than forcing a resume; this was tried
+  once (a click-to-resume fallback) and reverted per explicit request, so
+  don't reintroduce it without asking. See `MUSIC.md`.
 - **`admin/`**: GitHub-OAuth-gated panel (via the Cloudflare Worker in
   `cloudflare-worker/`) for managing photos and music — drag-and-drop
   upload to Cloudinary, inline editing, drag-to-reorder, publishes to
@@ -46,6 +50,7 @@ them:
 | `photos.json` | admin panel | `PHOTOS.md` |
 | `playlist.json` | admin panel | `MUSIC.md` |
 | `project-overrides.json` | hand-edit | `PROJECTS.md` |
+| `experience.json` | hand-edit | `EXPERIENCE.md` |
 
 ## Adding a new project to the Projects page
 

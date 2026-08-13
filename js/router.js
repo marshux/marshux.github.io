@@ -5,7 +5,7 @@
 // <main> and are never touched, so playback survives navigation instead of
 // restarting from a fresh document every click.
 (function () {
-  const SWAPPABLE_PATHS = new Set(["/", "/index.html", "/projects.html", "/photography.html"]);
+  const SWAPPABLE_PATHS = new Set(["/", "/index.html", "/projects.html", "/photography.html", "/experience.html"]);
 
   let navToken = 0;
 
@@ -56,6 +56,7 @@
     if (typeof highlightActiveNavLink === "function") highlightActiveNavLink();
     if (typeof loadProjects === "function") loadProjects();
     if (typeof loadPhotos === "function") loadPhotos();
+    if (typeof loadExperience === "function") loadExperience();
 
     if (scrollToTop) window.scrollTo(0, 0);
   }

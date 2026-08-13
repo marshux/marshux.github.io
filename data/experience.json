@@ -1,0 +1,13 @@
+{
+  "roles": [
+    {
+      "company": "Company Name",
+      "role": "Job Title",
+      "location": "City, State",
+      "start": "2024",
+      "end": "Present",
+      "description": "One or two sentences on scope and impact.",
+      "tags": ["Backend", "Python"]
+    }
+  ]
+}
