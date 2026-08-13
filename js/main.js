@@ -66,14 +66,28 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+// Per-repo display overrides (image/TLDR/tags) — see PROJECTS.md for the
+// schema and how to add an entry for a repo.
+async function loadProjectOverrides() {
+  try {
+    const res = await fetch("data/project-overrides.json");
+    if (!res.ok) throw new Error("no overrides");
+    const data = await res.json();
+    return data && typeof data === "object" ? data : {};
+  } catch (err) {
+    return {};
+  }
+}
+
 async function loadProjects() {
   const grid = document.getElementById("projects-grid");
   if (!grid) return;
 
   try {
-    const res = await fetch(
-      `https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=100`
-    );
+    const [res, overrides] = await Promise.all([
+      fetch(`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=100`),
+      loadProjectOverrides(),
+    ]);
     if (!res.ok) throw new Error(`GitHub API responded ${res.status}`);
     const repos = await res.json();
     const visible = repos.filter((r) => !r.fork && !HIDDEN_REPOS.has(r.name));
@@ -84,17 +98,30 @@ async function loadProjects() {
     }
 
     grid.innerHTML = visible
-      .map(
-        (r) => `
-      <article class="project-card">
-        <h3><a href="${r.html_url}" target="_blank" rel="noopener">${escapeHtml(r.name)}</a></h3>
-        <p class="project-desc">${escapeHtml(r.description || "No description yet.")}</p>
-        <div class="project-meta">
-          ${r.language ? `<span><span class="lang-dot"></span>${escapeHtml(r.language)}</span>` : ""}
-          <span>&#9733; ${r.stargazers_count}</span>
+      .map((r) => {
+        const o = overrides[r.name] || {};
+        const tldr = o.tldr || r.description || "No description yet.";
+        const tags = Array.isArray(o.tags) && o.tags.length ? o.tags : r.language ? [r.language] : [];
+        const imageHtml = o.image
+          ? `<div class="project-row-image"><img src="${withAutoOptimize(o.image)}" alt="" loading="lazy" decoding="async" /></div>`
+          : "";
+        const tagsHtml = tags.length
+          ? `<div class="project-tags">${tags.map((t) => `<span class="project-tag">${escapeHtml(t)}</span>`).join("")}</div>`
+          : "";
+        return `
+      <article class="project-row">
+        ${imageHtml}
+        <div class="project-row-body">
+          <h3><a href="${r.html_url}" target="_blank" rel="noopener">${escapeHtml(r.name)}</a></h3>
+          <p class="project-desc">${escapeHtml(tldr)}</p>
+          ${tagsHtml}
+          <div class="project-meta">
+            ${r.language ? `<span><span class="lang-dot"></span>${escapeHtml(r.language)}</span>` : ""}
+            <span>&#9733; ${r.stargazers_count}</span>
+          </div>
         </div>
-      </article>`
-      )
+      </article>`;
+      })
       .join("");
   } catch (err) {
     grid.innerHTML = `<p class="empty-state">Couldn't load projects right now. See them directly on <a href="https://github.com/${GITHUB_USER}?tab=repositories" target="_blank" rel="noopener">GitHub</a>.</p>`;
