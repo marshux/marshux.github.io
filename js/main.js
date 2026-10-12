@@ -123,7 +123,7 @@ async function loadProjects() {
       </article>`;
       })
       .join("");
-    queueTyping(grid.children);
+    startTyping(grid.children);
   } catch (err) {
     grid.innerHTML = `<p class="empty-state">Couldn't load projects right now. See them directly on <a href="https://github.com/${GITHUB_USER}?tab=repositories" target="_blank" rel="noopener">GitHub</a>.</p>`;
   }
@@ -166,117 +166,78 @@ async function loadPhotos() {
 
 // ---- Typewriter motion (styles: "Typewriter treatment" in css/style.css) ----
 //
-// One typist works down the page: every [data-type] / [data-reveal] element
-// in <main>, then each list row as its data loads, is queued and typed out in
-// order. A unit stays hidden until the typist reaches it, then its box
-// (border, image, icons) cuts in and its text is typed node by node.
+// Everything types at once: each [data-type] / [data-reveal] element in
+// <main>, and each list row as its data loads, starts typing as soon as it
+// exists, and every piece of text inside it (title, description, each tag)
+// is typed in parallel at the same steady pace. Long text simply finishes
+// later than short text, rather than anything being sped up to keep time.
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
-// Body text is typed fast enough that whatever is queued lands in roughly
-// this long, however much of it there is.
-const BODY_TYPING_BUDGET_MS = 1800;
-const typist = { run: 0, queue: [], busy: false, pendingChars: 0 };
+const BODY_CHARS_PER_SEC = 70;
+let typeRun = 0;
 
-// Splits each text node of `el` into a visible .typed span and a transparent
-// .untyped one. The full text stays in the DOM throughout, so layout never
-// shifts and assistive tech / copy-paste still see all of it.
-function prepareTyping(el) {
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-  const nodes = [];
-  while (walker.nextNode()) {
-    if (walker.currentNode.nodeValue.trim()) nodes.push(walker.currentNode);
-  }
-  el._typeNodes = nodes.map((node) => {
-    const wrap = document.createElement("span");
-    const typed = document.createElement("span");
-    typed.className = "typed";
-    const untyped = document.createElement("span");
-    untyped.className = "untyped";
-    untyped.textContent = node.nodeValue;
-    wrap.append(typed, untyped);
-    typist.pendingChars += node.nodeValue.length;
-    // holds back ::before/::after text ("[", "> ") until this node is typed
-    node.parentElement.classList.add("type-pending");
-    node.replaceWith(wrap);
-    return wrap;
-  });
-}
-
-async function typeNode(wrap, slow, run) {
-  const [typed, untyped] = wrap.children;
-  const text = untyped.textContent;
+// Types one text node. It is split into a visible .typed span and a
+// transparent .untyped one, so the full text stays in the DOM throughout:
+// layout never shifts and assistive tech / copy-paste still see all of it.
+async function typeNode(node, slow, run) {
+  const text = node.nodeValue;
+  const wrap = document.createElement("span");
+  const typed = document.createElement("span");
+  typed.className = "typed";
+  const untyped = document.createElement("span");
+  untyped.className = "untyped";
+  untyped.textContent = text;
+  wrap.append(typed, untyped);
+  node.replaceWith(wrap);
   const show = (n) => {
     typed.textContent = text.slice(0, n);
     untyped.textContent = text.slice(n);
   };
-  wrap.parentElement.classList.remove("type-pending");
-  typed.classList.add("is-active");
 
   if (slow) {
     // headings: uneven, human keystrokes with a longer beat after a space
     for (let i = 1; i <= text.length; i++) {
       await sleep(text[i - 2] === " " ? 100 : 30 + Math.random() * 45);
-      if (run !== typist.run || !wrap.isConnected) return;
+      if (run !== typeRun || !wrap.isConnected) return;
       show(i);
     }
   } else {
-    const charsPerMs = Math.min(1.2, Math.max(0.15, typist.pendingChars / BODY_TYPING_BUDGET_MS));
+    const start = performance.now();
     let n = 0;
-    let last = performance.now();
     while (n < text.length) {
       const now = await nextFrame();
-      if (run !== typist.run || !wrap.isConnected) return;
-      n = Math.min(text.length, n + Math.max(1, Math.round((now - last) * charsPerMs)));
-      last = now;
+      if (run !== typeRun || !wrap.isConnected) return;
+      n = Math.min(text.length, Math.floor(((now - start) / 1000) * BODY_CHARS_PER_SEC));
       show(n);
     }
   }
-  typist.pendingChars -= text.length;
   wrap.replaceWith(document.createTextNode(text));
 }
 
-async function runTypist(run) {
-  typist.busy = true;
-  while (typist.queue.length) {
-    const el = typist.queue.shift();
-    if (!el.isConnected) continue;
-    el.classList.remove("type-wait");
-    const slow = el.hasAttribute("data-type");
-    for (const wrap of el._typeNodes) {
-      await typeNode(wrap, slow, run);
-      if (run !== typist.run) return;
-    }
-    if (slow) el.classList.add("type-caret");
-    // a beat for the carriage return (and for units with no text, e.g. the avatar)
-    await sleep(el._typeNodes.length ? 30 : 120);
-    if (run !== typist.run) return;
-  }
-  typist.busy = false;
-}
-
-// Queues elements to be typed after whatever is already waiting.
-function queueTyping(els) {
+// Starts typing every text node inside each of `els`, all at the same time.
+function startTyping(els) {
   if (REDUCED_MOTION.matches) return;
+  const run = typeRun;
   for (const el of els) {
-    el.classList.add("type-wait");
-    prepareTyping(el);
-    typist.queue.push(el);
+    const slow = el.hasAttribute("data-type");
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      if (walker.currentNode.nodeValue.trim()) nodes.push(walker.currentNode);
+    }
+    const done = Promise.all(nodes.map((node) => typeNode(node, slow, run)));
+    if (slow) done.then(() => run === typeRun && el.classList.add("type-caret"));
   }
-  if (!typist.busy) runTypist(typist.run);
 }
 
-// Runs on first load and after every router swap of <main>, before the
-// load*() calls so list rows queue up behind the page's static text.
+// Runs on first load and after every router swap of <main>.
 function initTypewriter() {
   const main = document.querySelector("main");
   if (!main) return;
-  typist.run++;
-  typist.queue = [];
-  typist.busy = false;
-  typist.pendingChars = 0;
-  queueTyping(main.querySelectorAll("[data-type], [data-reveal]"));
+  typeRun++;
+  startTyping(main.querySelectorAll("[data-type], [data-reveal]"));
 }
 
 // data/experience.json schema and how to add an entry: see EXPERIENCE.md.
@@ -315,7 +276,7 @@ async function loadExperience() {
       </article>`;
       })
       .join("");
-    queueTyping(list.children);
+    startTyping(list.children);
   } catch (err) {
     list.innerHTML = `<p class="empty-state">Professional history coming soon.</p>`;
   }

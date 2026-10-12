@@ -3,12 +3,13 @@
 Marshal Xu's personal site. Static multi-page site, no backend, deployed to
 GitHub Pages via GitHub Actions. Monochrome typewriter theme: black on white (inverted in dark mode), Special
 Elite headings + Courier Prime body, palette via CSS custom properties.
-Motion is typewriter-style too: a single queue in `js/main.js` types the
-page out in DOM order (`[data-type]` headings at human speed, `[data-reveal]`
-elements and rendered list rows fast, via `queueTyping()`), restarted by
-`initTypewriter()` on load and after each `js/router.js` swap. New static
-text needs `data-reveal`; new rendered lists need a `queueTyping()` call.
-Keep it hard-cut: no eased fades, no color accent.
+Motion is typewriter-style too: all text in `<main>` types out in parallel
+at one steady pace (`startTyping()` in `js/main.js`; `[data-type]` headings
+at a slower human pace), kicked off by `initTypewriter()` on load and after
+each `js/router.js` swap, and by each `load*()` for its rendered rows. New
+static text needs `data-reveal`; new rendered lists need a `startTyping()`
+call. Don't speed text up to fit a time budget (tried, rejected as too
+fast). Keep it hard-cut: no eased fades, no color accent.
 
 ## Architecture
 
