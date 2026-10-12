@@ -1,10 +1,31 @@
 {
+  "docent": {
+    "tldr": "An art museum companion for iPhone. Photograph a piece, confirm what it is, then talk with a guide about its history out loud.",
+    "tags": [
+      "Swift",
+      "SwiftUI",
+      "iOS",
+      "Claude API",
+      "Voice"
+    ]
+  },
   "alpha-engine": {
     "tldr": "Systematic swing-trading research engine. Quant and AI news-research signals feed a deterministic, rules-based decision engine: the AI researches and scores, it never decides.",
-    "tags": ["Python", "Quant", "Backtesting", "FastAPI", "React"]
+    "tags": [
+      "Python",
+      "Quant",
+      "Backtesting",
+      "FastAPI",
+      "React"
+    ]
   },
   "tiny-llm": {
     "tldr": "Learning how LLMs are trained, two ways: a small GPT built and pretrained from scratch, and a LoRA fine-tune of Qwen3-0.6B.",
-    "tags": ["Python", "PyTorch", "LLM", "LoRA"]
+    "tags": [
+      "Python",
+      "PyTorch",
+      "LLM",
+      "LoRA"
+    ]
   }
 }
