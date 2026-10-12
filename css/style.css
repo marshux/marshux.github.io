@@ -494,7 +494,6 @@ main {
 .experience-list {
   display: flex;
   flex-direction: column;
-  border-bottom: 1px dashed var(--fg-muted);
 }
 
 .experience-item {
@@ -921,15 +920,25 @@ body {
   height: 7px;
 }
 
-/* Typing: js/main.js (typeText) splits the text into a visible .typed span
-   and a transparent .untyped one, so the line keeps its final size and
-   nothing reflows while it types. The caret is drawn off the end of .typed
-   with a cancelling negative margin for the same reason. */
+/* Typing: js/main.js splits each text node into a visible .typed span and a
+   transparent .untyped one, so a line keeps its final size and nothing
+   reflows while it types. The caret is drawn off the end of the active
+   .typed span with a cancelling negative margin for the same reason. */
 .untyped {
   color: transparent;
 }
 
-.typed::after,
+/* A queued unit is invisible until the typist reaches it, then cuts in. */
+.type-wait {
+  opacity: 0;
+}
+
+.type-pending::before,
+.type-pending::after {
+  opacity: 0;
+}
+
+.typed.is-active::after,
 .type-caret::after {
   content: "";
   display: inline-block;
@@ -951,24 +960,7 @@ body {
   }
 }
 
-/* Lines appear one after another with a hard cut, no fade -- like a
-   carriage working down the page. --i is the line index (set in main.js). */
-.line-in {
-  animation: line-in 1ms steps(1, end) both;
-  animation-delay: calc(var(--line-base, 0ms) + var(--i, 0) * 90ms);
-}
-
-@keyframes line-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .line-in,
   .type-caret::after {
     animation: none;
   }
@@ -996,4 +988,8 @@ body {
     right: 16px;
     bottom: 16px;
   }
+}
+
+.experience-item:last-child {
+  border-bottom: 1px dashed var(--fg-muted);
 }

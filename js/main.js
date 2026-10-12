@@ -123,7 +123,7 @@ async function loadProjects() {
       </article>`;
       })
       .join("");
-    revealLines(grid.children);
+    queueTyping(grid.children);
   } catch (err) {
     grid.innerHTML = `<p class="empty-state">Couldn't load projects right now. See them directly on <a href="https://github.com/${GITHUB_USER}?tab=repositories" target="_blank" rel="noopener">GitHub</a>.</p>`;
   }
@@ -165,51 +165,118 @@ async function loadPhotos() {
 }
 
 // ---- Typewriter motion (styles: "Typewriter treatment" in css/style.css) ----
+//
+// One typist works down the page: every [data-type] / [data-reveal] element
+// in <main>, then each list row as its data loads, is queued and typed out in
+// order. A unit stays hidden until the typist reaches it, then its box
+// (border, image, icons) cuts in and its text is typed node by node.
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-let typeRun = 0;
+const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+// Body text is typed fast enough that whatever is queued lands in roughly
+// this long, however much of it there is.
+const BODY_TYPING_BUDGET_MS = 1800;
+const typist = { run: 0, queue: [], busy: false, pendingChars: 0 };
 
-// Types an element's text out one character at a time. The full text stays
-// in the DOM throughout (split into a visible and a transparent span), so
-// layout never shifts and assistive tech / copy-paste still see all of it.
-async function typeText(el, run) {
-  const text = el.textContent;
-  const typed = document.createElement("span");
-  typed.className = "typed";
-  const untyped = document.createElement("span");
-  untyped.className = "untyped";
-  untyped.textContent = text;
-  el.replaceChildren(typed, untyped);
-
-  for (let i = 1; i <= text.length; i++) {
-    // uneven keystrokes, with a longer beat after a space
-    await sleep(text[i - 2] === " " ? 130 : 45 + Math.random() * 55);
-    if (run !== typeRun || !el.isConnected) return;
-    typed.textContent = text.slice(0, i);
-    untyped.textContent = text.slice(i);
+// Splits each text node of `el` into a visible .typed span and a transparent
+// .untyped one. The full text stays in the DOM throughout, so layout never
+// shifts and assistive tech / copy-paste still see all of it.
+function prepareTyping(el) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) {
+    if (walker.currentNode.nodeValue.trim()) nodes.push(walker.currentNode);
   }
-  el.textContent = text;
-  el.classList.add("type-caret");
-}
-
-// Staggers a hard-cut reveal down a set of elements, one "line" at a time.
-function revealLines(els, baseMs = 0) {
-  Array.from(els).forEach((el, i) => {
-    el.style.setProperty("--i", i);
-    el.style.setProperty("--line-base", `${baseMs}ms`);
-    el.classList.add("line-in");
+  el._typeNodes = nodes.map((node) => {
+    const wrap = document.createElement("span");
+    const typed = document.createElement("span");
+    typed.className = "typed";
+    const untyped = document.createElement("span");
+    untyped.className = "untyped";
+    untyped.textContent = node.nodeValue;
+    wrap.append(typed, untyped);
+    typist.pendingChars += node.nodeValue.length;
+    // holds back ::before/::after text ("[", "> ") until this node is typed
+    node.parentElement.classList.add("type-pending");
+    node.replaceWith(wrap);
+    return wrap;
   });
 }
 
-// Runs on first load and after every router swap of <main>.
+async function typeNode(wrap, slow, run) {
+  const [typed, untyped] = wrap.children;
+  const text = untyped.textContent;
+  const show = (n) => {
+    typed.textContent = text.slice(0, n);
+    untyped.textContent = text.slice(n);
+  };
+  wrap.parentElement.classList.remove("type-pending");
+  typed.classList.add("is-active");
+
+  if (slow) {
+    // headings: uneven, human keystrokes with a longer beat after a space
+    for (let i = 1; i <= text.length; i++) {
+      await sleep(text[i - 2] === " " ? 100 : 30 + Math.random() * 45);
+      if (run !== typist.run || !wrap.isConnected) return;
+      show(i);
+    }
+  } else {
+    const charsPerMs = Math.min(1.2, Math.max(0.15, typist.pendingChars / BODY_TYPING_BUDGET_MS));
+    let n = 0;
+    let last = performance.now();
+    while (n < text.length) {
+      const now = await nextFrame();
+      if (run !== typist.run || !wrap.isConnected) return;
+      n = Math.min(text.length, n + Math.max(1, Math.round((now - last) * charsPerMs)));
+      last = now;
+      show(n);
+    }
+  }
+  typist.pendingChars -= text.length;
+  wrap.replaceWith(document.createTextNode(text));
+}
+
+async function runTypist(run) {
+  typist.busy = true;
+  while (typist.queue.length) {
+    const el = typist.queue.shift();
+    if (!el.isConnected) continue;
+    el.classList.remove("type-wait");
+    const slow = el.hasAttribute("data-type");
+    for (const wrap of el._typeNodes) {
+      await typeNode(wrap, slow, run);
+      if (run !== typist.run) return;
+    }
+    if (slow) el.classList.add("type-caret");
+    // a beat for the carriage return (and for units with no text, e.g. the avatar)
+    await sleep(el._typeNodes.length ? 30 : 120);
+    if (run !== typist.run) return;
+  }
+  typist.busy = false;
+}
+
+// Queues elements to be typed after whatever is already waiting.
+function queueTyping(els) {
+  if (REDUCED_MOTION.matches) return;
+  for (const el of els) {
+    el.classList.add("type-wait");
+    prepareTyping(el);
+    typist.queue.push(el);
+  }
+  if (!typist.busy) runTypist(typist.run);
+}
+
+// Runs on first load and after every router swap of <main>, before the
+// load*() calls so list rows queue up behind the page's static text.
 function initTypewriter() {
   const main = document.querySelector("main");
   if (!main) return;
-  const run = ++typeRun;
-  revealLines(main.querySelectorAll("[data-reveal]"), 250);
-  if (REDUCED_MOTION.matches) return;
-  main.querySelectorAll("[data-type]").forEach((el) => typeText(el, run));
+  typist.run++;
+  typist.queue = [];
+  typist.busy = false;
+  typist.pendingChars = 0;
+  queueTyping(main.querySelectorAll("[data-type], [data-reveal]"));
 }
 
 // data/experience.json schema and how to add an entry: see EXPERIENCE.md.
@@ -248,13 +315,13 @@ async function loadExperience() {
       </article>`;
       })
       .join("");
-    revealLines(list.children);
+    queueTyping(list.children);
   } catch (err) {
     list.innerHTML = `<p class="empty-state">Professional history coming soon.</p>`;
   }
 }
 
+initTypewriter();
 loadProjects();
 loadPhotos();
 loadExperience();
-initTypewriter();
