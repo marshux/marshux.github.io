@@ -169,13 +169,24 @@ async function loadPhotos() {
 // Everything types at once: each [data-type] / [data-reveal] element in
 // <main>, and each list row as its data loads, starts typing as soon as it
 // exists, and every piece of text inside it (title, description, each tag)
-// is typed in parallel at the same steady pace. Long text simply finishes
-// later than short text, rather than anything being sped up to keep time.
+// is typed in parallel. Longer text types faster (see typingRate).
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
-const BODY_CHARS_PER_SEC = 70;
+// Body typing speed scales with how much there is to type: a piece of text
+// of BASE_LENGTH characters goes at BASE_CHARS_PER_SEC, shorter ones slower
+// and longer ones faster (sub-linearly, so a longer text still takes a bit
+// longer overall), within [MIN, MAX].
+const BASE_CHARS_PER_SEC = 70;
+const BASE_LENGTH = 80;
+const MIN_CHARS_PER_SEC = 45;
+const MAX_CHARS_PER_SEC = 220;
+
+function typingRate(length) {
+  const scaled = BASE_CHARS_PER_SEC * Math.pow(length / BASE_LENGTH, 0.6);
+  return Math.min(MAX_CHARS_PER_SEC, Math.max(MIN_CHARS_PER_SEC, scaled));
+}
 let typeRun = 0;
 
 // Typing waits for the two things that would otherwise move text around
@@ -236,10 +247,11 @@ async function typeNode(node, slow, run) {
     }
   } else {
     const start = performance.now();
+    const rate = typingRate(chars.length);
     while (shown < chars.length) {
       const now = await nextFrame();
       if (run !== typeRun || !wrap.isConnected) return;
-      show(Math.min(chars.length, Math.floor(((now - start) / 1000) * BODY_CHARS_PER_SEC)));
+      show(Math.min(chars.length, Math.floor(((now - start) / 1000) * rate)));
     }
   }
 }

@@ -4,12 +4,11 @@ Marshal Xu's personal site. Static multi-page site, no backend, deployed to
 GitHub Pages via GitHub Actions. Monochrome typewriter theme: black on white (inverted in dark mode), Special
 Elite headings + Courier Prime body, palette via CSS custom properties.
 Motion is typewriter-style too: all text in `<main>` types out in parallel
-at one steady pace (`startTyping()` in `js/main.js`; `[data-type]` headings
-at a slower human pace), kicked off by `initTypewriter()` on load and after
+(`startTyping()` in `js/main.js`; speed scales with each text's length via
+`typingRate()`, `[data-type]` headings at a slower human pace), kicked off by `initTypewriter()` on load and after
 each `js/router.js` swap, and by each `load*()` for its rendered rows. New
 static text needs `data-reveal`; new rendered lists need a `startTyping()`
-call. Don't speed text up to fit a time budget (tried, rejected as too
-fast). Keep it hard-cut: no eased fades, no color accent.
+call. Keep it hard-cut: no eased fades, no color accent.
 Nothing may move while text types (reported as "the website jumps"):
 `<main>` stays hidden until the nav partial and webfonts are in
 (`pageReady` in `js/main.js` -> `html.is-ready`), typing only flips a
