@@ -10,6 +10,12 @@ each `js/router.js` swap, and by each `load*()` for its rendered rows. New
 static text needs `data-reveal`; new rendered lists need a `startTyping()`
 call. Don't speed text up to fit a time budget (tried, rejected as too
 fast). Keep it hard-cut: no eased fades, no color accent.
+Nothing may move while text types (reported as "the website jumps"):
+`<main>` stays hidden until the nav partial and webfonts are in
+(`pageReady` in `js/main.js` -> `html.is-ready`), the caret is out of flow,
+the footer is pinned to the window bottom and hidden until lists render,
+and `scrollbar-gutter: stable` is set. Check new motion with a per-frame
+`getBoundingClientRect` diff in Playwright, not by eye.
 
 ## Architecture
 

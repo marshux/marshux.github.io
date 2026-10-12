@@ -178,6 +178,18 @@ const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve))
 const BODY_CHARS_PER_SEC = 70;
 let typeRun = 0;
 
+// Typing waits for the two things that would otherwise move text around
+// underneath it: the nav partial (pushes <main> down when it arrives) and
+// the webfonts (re-wrap every line when they swap in). <main> is hidden
+// until then -- see html:not(.is-ready) in css/style.css.
+const pageReady = Promise.all([
+  new Promise((resolve) => document.addEventListener("includes:loaded", resolve, { once: true })),
+  Promise.race([
+    Promise.all(['1em "Special Elite"', '1em "Courier Prime"', '700 1em "Courier Prime"'].map((f) => document.fonts.load(f))),
+    sleep(1500),
+  ]).catch(() => {}),
+]).then(() => document.documentElement.classList.add("is-ready"));
+
 // Types one text node. It is split into a visible .typed span and a
 // transparent .untyped one, so the full text stays in the DOM throughout:
 // layout never shifts and assistive tech / copy-paste still see all of it.
@@ -217,9 +229,11 @@ async function typeNode(node, slow, run) {
 }
 
 // Starts typing every text node inside each of `els`, all at the same time.
-function startTyping(els) {
+async function startTyping(els) {
   if (REDUCED_MOTION.matches) return;
   const run = typeRun;
+  await pageReady;
+  if (run !== typeRun) return;
   for (const el of els) {
     const slow = el.hasAttribute("data-type");
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);

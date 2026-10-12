@@ -922,8 +922,7 @@ body {
 
 /* Typing: js/main.js splits each text node into a visible .typed span and a
    transparent .untyped one, so a line keeps its final size and nothing
-   reflows while it types. The caret is drawn off the end of each
-   .typed span with a cancelling negative margin for the same reason. */
+   reflows while it types. The caret is kept out of flow for the same reason. */
 .untyped {
   color: transparent;
 }
@@ -931,12 +930,13 @@ body {
 .typed::after,
 .type-caret::after {
   content: "";
-  display: inline-block;
+  /* Out of flow, no offsets: it sits at its static position (the end of
+     the typed text) without taking part in line layout, so it can't change
+     a line's height or where a word wraps. */
+  position: absolute;
   width: 0.55em;
   height: 0.95em;
-  margin-left: 0.08em;
-  margin-right: -0.63em;
-  vertical-align: -0.08em;
+  margin: 0.2em 0 0 0.08em;
   background: currentColor;
 }
 
@@ -982,4 +982,47 @@ body {
 
 .experience-item:last-child {
   border-bottom: 1px dashed var(--fg-muted);
+}
+
+/* ---------- Nothing moves while the page types ---------- */
+
+/* Space for the scrollbar is always reserved, so the page doesn't nudge
+   sideways when a list loads and makes it scrollable. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Footer sits at the bottom of the window on short pages instead of right
+   under the content, so it doesn't leap down when a list loads in. */
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
+/* <main> stays hidden until the nav partial is in and the webfonts have
+   loaded (js/main.js adds .is-ready) -- both used to shove the text around
+   after it had started typing. The animation is a failsafe that shows the
+   page anyway if that script never runs. */
+html:not(.is-ready) main {
+  visibility: hidden;
+  animation: show-anyway 1ms 3s forwards;
+}
+
+@keyframes show-anyway {
+  to {
+    visibility: visible;
+  }
+}
+
+/* ...and the footer waits for a page's list to render, rather than showing
+   under the placeholder and then being pushed down by the rows. */
+main:has(.loading, #photo-grid:empty) ~ .site-footer {
+  visibility: hidden;
 }
