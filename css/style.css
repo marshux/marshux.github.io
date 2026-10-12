@@ -1144,3 +1144,24 @@ main:has(.loading, #photo-grid:empty) ~ .site-footer {
     animation: none;
   }
 }
+
+/* The whole project box is the link: the title's <a> is stretched over the
+   row, so there is still one real link for keyboards and screen readers. */
+.project-row {
+  position: relative;
+}
+
+.project-row-body h3 a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.project-row-body h3 a:focus-visible {
+  outline: none;
+}
+
+.project-row:has(h3 a:focus-visible) {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}
