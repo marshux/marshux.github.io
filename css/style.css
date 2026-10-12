@@ -1,44 +1,46 @@
 :root {
-  /* Editorial "paper" palette — light is the default look */
-  --bg: #faf6ee;
-  --bg-alt: #f2ead9;
-  --fg: #2b2621;
-  --fg-muted: #7a7267;
-  --accent: #b5760f;
-  --border: #e4dcc8;
-  --radius: 10px;
-  --max-width: 880px;
-  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Typewritten page: black ink on white paper. Monochrome on purpose --
+     --accent is the ink color itself, so emphasis comes from inversion,
+     underlines and borders rather than a second hue. */
+  --bg: #ffffff;
+  --bg-alt: #f3f3f3;
+  --fg: #000000;
+  --fg-muted: #5c5c5c;
+  --accent: #000000;
+  --border: #cfcfcf;
+  --radius: 0px;
+  --max-width: 760px;
+  --font-display: "Special Elite", "Courier Prime", "Courier New", Courier, monospace;
+  --font-body: "Courier Prime", "Courier New", Courier, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #16140f;
-    --bg-alt: #1f1c15;
-    --fg: #ece6d8;
-    --fg-muted: #a49a86;
-    --accent: #e0a94f;
-    --border: #2c2820;
+    --bg: #000000;
+    --bg-alt: #111111;
+    --fg: #ffffff;
+    --fg-muted: #a3a3a3;
+    --accent: #ffffff;
+    --border: #3a3a3a;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #16140f;
-  --bg-alt: #1f1c15;
-  --fg: #ece6d8;
-  --fg-muted: #a49a86;
-  --accent: #e0a94f;
-  --border: #2c2820;
+  --bg: #000000;
+  --bg-alt: #111111;
+  --fg: #ffffff;
+  --fg-muted: #a3a3a3;
+  --accent: #ffffff;
+  --border: #3a3a3a;
 }
 
 :root[data-theme="light"] {
-  --bg: #faf6ee;
-  --bg-alt: #f2ead9;
-  --fg: #2b2621;
-  --fg-muted: #7a7267;
-  --accent: #b5760f;
-  --border: #e4dcc8;
+  --bg: #ffffff;
+  --bg-alt: #f3f3f3;
+  --fg: #000000;
+  --fg-muted: #5c5c5c;
+  --accent: #000000;
+  --border: #cfcfcf;
 }
 
 * {
@@ -59,19 +61,19 @@ html {
 body {
   margin: 0;
   background-color: var(--bg);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
   color: var(--fg);
   font-family: var(--font-body);
   line-height: 1.6;
 }
 
 a {
-  color: var(--accent);
-  text-decoration: none;
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 a:hover {
-  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 .site-header {
@@ -97,7 +99,7 @@ a:hover {
 
 .nav-brand {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 1.15rem;
   color: var(--fg);
   letter-spacing: 0.02em;
@@ -137,13 +139,12 @@ a:hover {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--fg-muted);
   cursor: pointer;
   padding: 0;
-  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .theme-toggle:hover {
@@ -192,10 +193,8 @@ main {
 }
 
 .about {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 0 0 48px;
-  text-align: center;
+  max-width: 62ch;
+  padding: 0 0 40px;
 }
 
 .about p {
@@ -218,18 +217,16 @@ main {
   border-radius: var(--radius);
   padding: 22px;
   color: var(--fg);
-  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
 .home-card:hover {
   border-color: var(--accent);
-  transform: translateY(-2px);
   text-decoration: none;
 }
 
 .home-card h3 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   margin: 0 0 6px;
   font-size: 1.15rem;
 }
@@ -241,30 +238,22 @@ main {
 }
 
 .hero {
-  text-align: center;
-  padding: 80px 0 60px;
+  padding: 64px 0 28px;
 }
 
 .avatar {
-  border-radius: 50%;
-  border: 2px solid var(--border);
+  border: 1px solid var(--fg);
+  filter: grayscale(1) contrast(1.1);
 }
 
 .hero h1 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   margin: 24px 0 6px;
   font-size: 2.4rem;
 }
 
-.hero h1::after {
-  content: "";
-  display: block;
-  width: 44px;
-  height: 2px;
-  background: var(--accent);
-  margin: 16px auto 0;
-}
+
 
 .handle {
   color: var(--fg-muted);
@@ -274,13 +263,12 @@ main {
 .tagline {
   font-size: 1.05rem;
   color: var(--fg);
-  max-width: 460px;
-  margin: 0 auto 20px;
+  max-width: 60ch;
+  margin: 0 0 20px;
 }
 
 .hero-links {
   display: flex;
-  justify-content: center;
   gap: 12px;
 }
 
@@ -290,7 +278,7 @@ main {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 0;
   border: 1px solid var(--border);
   color: var(--fg);
 }
@@ -318,7 +306,7 @@ main {
 .section h1,
 .section h2 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 1.6rem;
   margin-bottom: 8px;
 }
@@ -342,7 +330,7 @@ main {
 .chips li {
   background: var(--bg-alt);
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 0;
   padding: 6px 14px;
   font-size: 0.88rem;
   color: var(--fg-muted);
@@ -362,12 +350,10 @@ main {
   display: flex;
   gap: 16px;
   align-items: stretch;
-  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
 .project-row:hover {
   border-color: var(--accent);
-  transform: translateY(-2px);
 }
 
 .project-row-image {
@@ -396,7 +382,7 @@ main {
 
 .project-row-body h3 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   margin: 0;
   font-size: 1.1rem;
 }
@@ -425,7 +411,7 @@ main {
 .project-tag {
   font-size: 0.72rem;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid var(--border);
   color: var(--fg-muted);
 }
@@ -451,7 +437,7 @@ main {
   display: inline-block;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: 0;
   background: var(--accent);
   margin-right: 5px;
 }
@@ -508,14 +494,12 @@ main {
 .experience-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  border-bottom: 1px dashed var(--fg-muted);
 }
 
 .experience-item {
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
+  border-top: 1px dashed var(--fg-muted);
+  padding: 20px 0;
   display: flex;
   gap: 18px;
 }
@@ -538,7 +522,7 @@ main {
 
 .experience-body h3 {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 400;
   margin: 0;
   font-size: 1.05rem;
 }
@@ -564,7 +548,7 @@ main {
 .experience-tag {
   font-size: 0.72rem;
   padding: 2px 10px;
-  border-radius: 999px;
+  border-radius: 0;
   border: 1px solid var(--border);
   color: var(--fg-muted);
 }
@@ -596,7 +580,7 @@ main {
   background: color-mix(in srgb, var(--bg) 97%, transparent);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  box-shadow: 4px 4px 0 var(--fg);
 }
 
 #player-bar[hidden] {
@@ -669,7 +653,7 @@ main {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--fg);
@@ -756,7 +740,7 @@ main {
   display: flex;
   flex-direction: column;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: 0;
   cursor: pointer;
 }
 
@@ -806,5 +790,210 @@ main {
     left: 12px;
     width: 180px;
     padding: 12px;
+  }
+}
+
+/* ---------- Typewriter treatment ---------- */
+
+body {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.nav-brand,
+.nav-links a,
+.home-card,
+.social-link,
+.project-row-body h3 a {
+  text-decoration: none;
+}
+
+.nav-links a {
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.nav-links a.active {
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  text-decoration-thickness: 2px;
+}
+
+.hero h1 {
+  margin: 22px 0 4px;
+  letter-spacing: 0.01em;
+}
+
+.handle {
+  margin: 0 0 14px;
+}
+
+/* Page titles read like a typed heading: caps, ruled off underneath. */
+.section h1,
+.section h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 1.35rem;
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 3px double var(--fg);
+}
+
+.home-card,
+.project-row {
+  background: transparent;
+  border-color: var(--fg);
+}
+
+.home-card h3::before {
+  content: "> ";
+}
+
+.home-card:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.home-card:hover p {
+  color: var(--bg);
+}
+
+.project-row:hover {
+  box-shadow: 4px 4px 0 var(--fg);
+}
+
+.social-link,
+.theme-toggle,
+.player-btn {
+  border-color: var(--fg);
+}
+
+.social-link:hover,
+.theme-toggle:hover,
+.player-btn:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+#player-bar {
+  border-color: var(--fg);
+}
+
+/* Tags are typed in brackets rather than drawn as pills. */
+.project-tag,
+.experience-tag {
+  border: none;
+  padding: 0;
+  font-size: 0.78rem;
+}
+
+.project-tag::before,
+.experience-tag::before {
+  content: "[";
+}
+
+.project-tag::after,
+.experience-tag::after {
+  content: "]";
+}
+
+.project-tags,
+.experience-tags {
+  gap: 4px 10px;
+}
+
+.experience-dates {
+  flex-basis: 15ch;
+  font-weight: 400;
+  font-size: 0.82rem;
+}
+
+.experience-desc,
+.project-desc {
+  color: var(--fg);
+  font-size: 0.92rem;
+}
+
+.lang-dot {
+  width: 7px;
+  height: 7px;
+}
+
+/* Typing: js/main.js (typeText) splits the text into a visible .typed span
+   and a transparent .untyped one, so the line keeps its final size and
+   nothing reflows while it types. The caret is drawn off the end of .typed
+   with a cancelling negative margin for the same reason. */
+.untyped {
+  color: transparent;
+}
+
+.typed::after,
+.type-caret::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 0.95em;
+  margin-left: 0.08em;
+  margin-right: -0.63em;
+  vertical-align: -0.08em;
+  background: currentColor;
+}
+
+.type-caret::after {
+  animation: caret-blink 1.06s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Lines appear one after another with a hard cut, no fade -- like a
+   carriage working down the page. --i is the line index (set in main.js). */
+.line-in {
+  animation: line-in 1ms steps(1, end) both;
+  animation-delay: calc(var(--line-base, 0ms) + var(--i, 0) * 90ms);
+}
+
+@keyframes line-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line-in,
+  .type-caret::after {
+    animation: none;
+  }
+}
+
+.experience-item:first-child {
+  border-top: none;
+  padding-top: 8px;
+}
+
+.experience-dates {
+  flex-basis: 20ch;
+}
+
+.nav-brand {
+  white-space: nowrap;
+}
+
+/* The page is left-aligned now, so below this width the top-left player
+   would sit on top of the text column. Dock it bottom-right instead. */
+@media (max-width: 1260px) {
+  #player-bar {
+    top: auto;
+    left: auto;
+    right: 16px;
+    bottom: 16px;
   }
 }

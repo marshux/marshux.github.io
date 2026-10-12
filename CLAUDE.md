@@ -1,8 +1,12 @@
 # marshux.github.io
 
 Marshal Xu's personal site. Static multi-page site, no backend, deployed to
-GitHub Pages via GitHub Actions. Editorial "paper" theme (Playfair Display
-serif headings, warm light/dark palette via CSS custom properties).
+GitHub Pages via GitHub Actions. Monochrome typewriter theme: black on white (inverted in dark mode), Special
+Elite headings + Courier Prime body, palette via CSS custom properties.
+Motion is typewriter-style too: `[data-type]` headings are typed out and
+`[data-reveal]` elements / rendered list rows cut in line by line
+(`initTypewriter()` / `revealLines()` in `js/main.js`, re-run by
+`js/router.js` after each swap). Keep it hard-cut: no eased fades, no color accent.
 
 ## Architecture
 
@@ -21,7 +25,7 @@ serif headings, warm light/dark palette via CSS custom properties).
   see the "no backdrop-filter" comment in `css/style.css`, it was a real
   performance bottleneck), nav highlighting, `loadProjects()`, `loadPhotos()`,
   `loadExperience()`.
-- **`js/player.js`**: the "Now Playing" widget (top-left, fixed position).
+- **`js/player.js`**: the "Now Playing" widget (fixed top-left; docks bottom-right below 1260px).
   State (track, position, volume, mute) persists to `sessionStorage` and
   best-effort resumes on reload — browsers can silently block
   autoplay-with-sound on a fresh navigation, in which case the player just

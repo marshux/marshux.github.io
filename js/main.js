@@ -123,6 +123,7 @@ async function loadProjects() {
       </article>`;
       })
       .join("");
+    revealLines(grid.children);
   } catch (err) {
     grid.innerHTML = `<p class="empty-state">Couldn't load projects right now. See them directly on <a href="https://github.com/${GITHUB_USER}?tab=repositories" target="_blank" rel="noopener">GitHub</a>.</p>`;
   }
@@ -163,6 +164,54 @@ async function loadPhotos() {
   }
 }
 
+// ---- Typewriter motion (styles: "Typewriter treatment" in css/style.css) ----
+
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)");
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+let typeRun = 0;
+
+// Types an element's text out one character at a time. The full text stays
+// in the DOM throughout (split into a visible and a transparent span), so
+// layout never shifts and assistive tech / copy-paste still see all of it.
+async function typeText(el, run) {
+  const text = el.textContent;
+  const typed = document.createElement("span");
+  typed.className = "typed";
+  const untyped = document.createElement("span");
+  untyped.className = "untyped";
+  untyped.textContent = text;
+  el.replaceChildren(typed, untyped);
+
+  for (let i = 1; i <= text.length; i++) {
+    // uneven keystrokes, with a longer beat after a space
+    await sleep(text[i - 2] === " " ? 130 : 45 + Math.random() * 55);
+    if (run !== typeRun || !el.isConnected) return;
+    typed.textContent = text.slice(0, i);
+    untyped.textContent = text.slice(i);
+  }
+  el.textContent = text;
+  el.classList.add("type-caret");
+}
+
+// Staggers a hard-cut reveal down a set of elements, one "line" at a time.
+function revealLines(els, baseMs = 0) {
+  Array.from(els).forEach((el, i) => {
+    el.style.setProperty("--i", i);
+    el.style.setProperty("--line-base", `${baseMs}ms`);
+    el.classList.add("line-in");
+  });
+}
+
+// Runs on first load and after every router swap of <main>.
+function initTypewriter() {
+  const main = document.querySelector("main");
+  if (!main) return;
+  const run = ++typeRun;
+  revealLines(main.querySelectorAll("[data-reveal]"), 250);
+  if (REDUCED_MOTION.matches) return;
+  main.querySelectorAll("[data-type]").forEach((el) => typeText(el, run));
+}
+
 // data/experience.json schema and how to add an entry: see EXPERIENCE.md.
 async function loadExperience() {
   const list = document.getElementById("experience-list");
@@ -199,6 +248,7 @@ async function loadExperience() {
       </article>`;
       })
       .join("");
+    revealLines(list.children);
   } catch (err) {
     list.innerHTML = `<p class="empty-state">Professional history coming soon.</p>`;
   }
@@ -207,3 +257,4 @@ async function loadExperience() {
 loadProjects();
 loadPhotos();
 loadExperience();
+initTypewriter();

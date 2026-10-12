@@ -57,6 +57,7 @@
     if (typeof loadProjects === "function") loadProjects();
     if (typeof loadPhotos === "function") loadPhotos();
     if (typeof loadExperience === "function") loadExperience();
+    if (typeof initTypewriter === "function") initTypewriter();
 
     if (scrollToTop) window.scrollTo(0, 0);
   }

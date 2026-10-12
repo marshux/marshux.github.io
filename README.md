@@ -1,8 +1,8 @@
 # marshux.github.io
 
 Personal site for Marshal Xu — [marshux.github.io](https://marshux.github.io).
-A static, multi-page site with an editorial "paper" look (Playfair Display
-headings, warm light/dark theme), a self-managed content workflow, and no
+A static, multi-page site with a black-and-white typewriter look (Special Elite and
+Courier Prime, typed-out headings, light/dark theme), a self-managed content workflow, and no
 backend of its own.
 
 ## Tech stack
