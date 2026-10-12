@@ -1,13 +1,40 @@
 {
   "roles": [
     {
-      "company": "Company Name",
-      "role": "Job Title",
-      "location": "City, State",
-      "start": "2024",
+      "company": "Abacus.AI",
+      "role": "Technical Lead, Core Agentic Platform (ChatLLM)",
+      "location": "Remote",
+      "start": "Nov 2024",
       "end": "Present",
-      "description": "One or two sentences on scope and impact.",
-      "tags": ["Backend", "Python"]
+      "description": "Lead a team of 7 engineers on ChatLLM's core agentic infrastructure, serving 400k+ users. Architected a task-classified model router across OpenAI, Anthropic, and Gemini (45% fewer LLM calls per turn), shipped the chat-to-agent hand-off now routing 31k conversations a week, cut input-token spend by ~$1.5M a year through prompt caching, and built the structured tool-use layer and virtual file system behind agent document generation and diff-based code edits.",
+      "tags": ["AI Agents", "Model Routing", "Prompt Caching", "Tool Use", "Team Lead"]
+    },
+    {
+      "company": "Abacus.AI",
+      "role": "Technical Lead, Health Expert (ChatLLM Health Vertical)",
+      "location": "Remote",
+      "start": "Aug 2026",
+      "end": "Present",
+      "description": "Identified health questions as 7.5% of all ChatLLM conversations and launched a mobile-first product that reached 1,000 connected users in two weeks. Built the backend and full iOS and Android clients, reconciling readings across 8 wearable ecosystems into recovery and sleep scores, moved ingestion to webhook-first delivery with an in-house HealthKit pipeline (62% fewer third-party API events), and designed a push notification system whose holdout showed re-engagement pushes more than doubled return visits.",
+      "tags": ["iOS", "Android", "HealthKit", "Webhooks", "A/B Testing"]
+    },
+    {
+      "company": "Abacus.AI",
+      "role": "Technical Lead, Role Play (ChatLLM Character Chat Vertical)",
+      "location": "Remote",
+      "start": "May 2026",
+      "end": "Present",
+      "description": "Launched an AI character chat product with a catalog, one-click character creation, voice, and scene illustration; two-thirds of chats are on user-created characters. Built the detector and hand-off that move role-play out of the general assistant onto a dedicated stack, converting 25% of users shown the offer and cutting cost per reply by over 90%.",
+      "tags": ["0-to-1 Product", "Multimodal", "LLM Cost Optimization"]
+    },
+    {
+      "company": "Endeavor AI",
+      "role": "Founding Engineer",
+      "location": "Philadelphia, PA",
+      "start": "Jan 2024",
+      "end": "May 2024",
+      "description": "Built automation workflows using OCR, PDF parsing, and deterministic similarity scoring to generate manufacturer sales quotes from unstructured documents and images. Designed a dogfood data pipeline to measure LLM accuracy on inventory translation against real orders.",
+      "tags": ["OCR", "Document Parsing", "LLM Evals"]
     }
   ]
 }
