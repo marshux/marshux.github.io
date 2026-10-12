@@ -920,19 +920,22 @@ body {
   height: 7px;
 }
 
-/* Typing: js/main.js splits each text node into a visible .typed span and a
-   transparent .untyped one, so a line keeps its final size and nothing
-   reflows while it types. The caret is kept out of flow for the same reason. */
-.untyped {
+/* Typing: js/main.js wraps every character in a .ch span, transparent
+   until it is "typed" (.on). Nothing about the text's layout changes while
+   it types -- only color. The caret is out of flow for the same reason: at
+   its static position (just after the last typed character) it takes no
+   part in line layout, so it can't change a line's height or wrapping. */
+.type-run .ch {
   color: transparent;
 }
 
-.typed::after,
+.type-run .ch.on {
+  color: inherit;
+}
+
+.ch.caret::after,
 .type-caret::after {
   content: "";
-  /* Out of flow, no offsets: it sits at its static position (the end of
-     the typed text) without taking part in line layout, so it can't change
-     a line's height or where a word wraps. */
   position: absolute;
   width: 0.55em;
   height: 0.95em;

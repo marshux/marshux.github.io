@@ -12,7 +12,9 @@ call. Don't speed text up to fit a time budget (tried, rejected as too
 fast). Keep it hard-cut: no eased fades, no color accent.
 Nothing may move while text types (reported as "the website jumps"):
 `<main>` stays hidden until the nav partial and webfonts are in
-(`pageReady` in `js/main.js` -> `html.is-ready`), the caret is out of flow,
+(`pageReady` in `js/main.js` -> `html.is-ready`), typing only flips a
+color class on pre-built per-character spans (never edits text mid-typing --
+that re-wrapped lines on the user's browser), the caret is out of flow,
 the footer is pinned to the window bottom and hidden until lists render,
 and `scrollbar-gutter: stable` is set. Check new motion with a per-frame
 `getBoundingClientRect` diff in Playwright, not by eye.

@@ -190,42 +190,58 @@ const pageReady = Promise.all([
   ]).catch(() => {}),
 ]).then(() => document.documentElement.classList.add("is-ready"));
 
-// Types one text node. It is split into a visible .typed span and a
-// transparent .untyped one, so the full text stays in the DOM throughout:
-// layout never shifts and assistive tech / copy-paste still see all of it.
+// Types one text node. Every character is wrapped in its own (initially
+// transparent) span up front, and typing only flips a class on them -- the
+// DOM and the text runs never change while it types, so the browser has no
+// reason to re-measure or re-wrap a line midway. (Moving text between a
+// "typed" and an "untyped" span, as this used to, could re-wrap lines that
+// only just fit, depending on the browser's sub-pixel text rounding.) The
+// spans are left in place afterwards for the same reason; the full text is
+// in the DOM throughout for assistive tech and copy-paste.
 async function typeNode(node, slow, run) {
   const text = node.nodeValue;
   const wrap = document.createElement("span");
-  const typed = document.createElement("span");
-  typed.className = "typed";
-  const untyped = document.createElement("span");
-  untyped.className = "untyped";
-  untyped.textContent = text;
-  wrap.append(typed, untyped);
+  wrap.className = "type-run";
+  const chars = [];
+  // whitespace stays as plain text between the spans, so words wrap normally
+  for (const part of text.split(/(\s+)/)) {
+    if (!part) continue;
+    if (/^\s+$/.test(part)) {
+      wrap.append(part);
+      continue;
+    }
+    for (const ch of part) {
+      const span = document.createElement("span");
+      span.className = "ch";
+      span.textContent = ch;
+      wrap.append(span);
+      chars.push(span);
+    }
+  }
   node.replaceWith(wrap);
+
+  let shown = 0;
   const show = (n) => {
-    typed.textContent = text.slice(0, n);
-    untyped.textContent = text.slice(n);
+    if (shown > 0) chars[shown - 1].classList.remove("caret");
+    for (; shown < n; shown++) chars[shown].classList.add("on");
+    if (shown > 0 && shown < chars.length) chars[shown - 1].classList.add("caret");
   };
 
   if (slow) {
-    // headings: uneven, human keystrokes with a longer beat after a space
-    for (let i = 1; i <= text.length; i++) {
-      await sleep(text[i - 2] === " " ? 100 : 30 + Math.random() * 45);
+    // headings: uneven, human keystrokes
+    for (let i = 1; i <= chars.length; i++) {
+      await sleep(40 + Math.random() * 55);
       if (run !== typeRun || !wrap.isConnected) return;
       show(i);
     }
   } else {
     const start = performance.now();
-    let n = 0;
-    while (n < text.length) {
+    while (shown < chars.length) {
       const now = await nextFrame();
       if (run !== typeRun || !wrap.isConnected) return;
-      n = Math.min(text.length, Math.floor(((now - start) / 1000) * BODY_CHARS_PER_SEC));
-      show(n);
+      show(Math.min(chars.length, Math.floor(((now - start) / 1000) * BODY_CHARS_PER_SEC)));
     }
   }
-  wrap.replaceWith(document.createTextNode(text));
 }
 
 // Starts typing every text node inside each of `els`, all at the same time.
