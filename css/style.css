@@ -1165,3 +1165,27 @@ main:has(.loading, #photo-grid:empty) ~ .site-footer {
   outline: 2px solid var(--fg);
   outline-offset: 3px;
 }
+
+/* Photography intro: camera line + a short note, above the grid. */
+.photo-intro {
+  max-width: 64ch;
+  margin: 0 0 28px;
+}
+
+.photo-gear {
+  margin: 0 0 12px;
+}
+
+.photo-gear-label {
+  display: inline-block;
+  min-width: 9ch;
+  color: var(--fg-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.photo-note {
+  margin: 0;
+  font-size: 0.95rem;
+}
