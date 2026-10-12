@@ -1,7 +1,8 @@
 # Professional history
 
-`experience.html` renders `data/experience.json` as a list, in the order
-the file lists them — put the most recent role first.
+`experience.html` renders `data/experience.json` as a vertical timeline (work
+and school together), in the order the file lists them — put the most
+recent entry first.
 
 ## Schema
 
@@ -24,6 +25,9 @@ the file lists them — put the most recent role first.
 - `company`, `role` &mdash; required for the entry to be meaningful, but
   nothing crashes if they're missing (`role` falls back to "Untitled role",
   a missing `company` just leaves that line out).
+- `kind` &mdash; optional. Set to `"education"` for a school entry (hollow
+  timeline marker instead of a filled one); put the school in `company` and
+  the degree in `role`. Omit for jobs.
 - `location` &mdash; optional, shown next to the company as
   "Company &middot; Location".
 - `start` / `end` &mdash; free-text, not parsed as real dates. Use "Present"

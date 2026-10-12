@@ -21,11 +21,23 @@
       "location": "Philadelphia, PA",
       "start": "Jan 2024",
       "end": "May 2024",
-      "description": "First engineer at an early-stage startup bringing AI to manufacturing sales. Built the workflows that turn messy documents and images into ready-to-send quotes, and the tooling to check how well the models were actually doing.",
+      "description": "Third engineer at an early-stage startup bringing AI to manufacturing sales. Built the workflows that turn messy documents and images into ready-to-send quotes, and the tooling to check how well the models were actually doing.",
       "tags": [
         "Startups",
         "Document AI",
         "LLM Evals"
+      ]
+    },
+    {
+      "kind": "education",
+      "company": "University of Pennsylvania",
+      "role": "B.S.E. in Computer Science",
+      "location": "Philadelphia, PA",
+      "end": "Class of 2024",
+      "description": "Studied computer science with a minor in mathematics.",
+      "tags": [
+        "Computer Science",
+        "Mathematics"
       ]
     }
   ]

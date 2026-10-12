@@ -287,7 +287,7 @@ async function loadExperience() {
     }
 
     list.innerHTML = roles
-      .map((r) => {
+      .map((r, i) => {
         const dateRange = [r.start, r.end].filter(Boolean).map(escapeHtml).join(" &ndash; ");
         const tags = Array.isArray(r.tags) ? r.tags : [];
         const tagsHtml = tags.length
@@ -295,8 +295,9 @@ async function loadExperience() {
           : "";
         const subtitle = [r.company, r.location].filter(Boolean).map(escapeHtml).join(" &middot; ");
         return `
-      <article class="experience-item">
+      <article class="experience-item${r.kind === "education" ? " is-education" : ""}" style="--i: ${i}">
         <div class="experience-dates">${dateRange}</div>
+        <div class="experience-rail" aria-hidden="true"></div>
         <div class="experience-body">
           <h3>${escapeHtml(r.role || "Untitled role")}</h3>
           ${subtitle ? `<p class="experience-company">${subtitle}</p>` : ""}

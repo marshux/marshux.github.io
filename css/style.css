@@ -1029,3 +1029,118 @@ html:not(.is-ready) main {
 main:has(.loading, #photo-grid:empty) ~ .site-footer {
   visibility: hidden;
 }
+
+/* ---------- Experience timeline ---------- */
+
+/* dates | rail | body. The rail is one continuous line down the list with
+   a square marker per entry (filled = work, hollow = school). It is drawn
+   in with transforms only, entry by entry, so nothing reflows. */
+.experience-item,
+.experience-item:first-child,
+.experience-item:last-child {
+  display: grid;
+  grid-template-columns: 9.5rem 1.5rem minmax(0, 1fr);
+  grid-template-areas: "dates rail body";
+  gap: 0 14px;
+  border: none;
+  padding: 0 0 34px;
+}
+
+.experience-item:first-child {
+  padding-top: 10px;
+}
+
+.experience-item:last-child {
+  padding-bottom: 8px;
+}
+
+.experience-dates {
+  grid-area: dates;
+  text-align: right;
+}
+
+.experience-body {
+  grid-area: body;
+}
+
+.experience-rail {
+  grid-area: rail;
+  position: relative;
+}
+
+.experience-rail::before {
+  content: "";
+  position: absolute;
+  top: 0.45em;
+  bottom: calc(-34px - 0.45em);
+  left: 50%;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--fg);
+  transform-origin: top;
+  animation: rail-draw 0.9s steps(12, end) both;
+  animation-delay: calc(var(--i, 0) * 0.9s + 0.15s);
+}
+
+/* the line stops at the oldest entry's marker */
+.experience-item:last-child .experience-rail::before {
+  display: none;
+}
+
+.experience-rail::after {
+  content: "";
+  position: absolute;
+  top: 0.45em;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  margin-left: -5.5px;
+  border: 1px solid var(--fg);
+  background: var(--fg);
+  animation: rail-mark 20ms linear both;
+  animation-delay: calc(var(--i, 0) * 0.9s + 0.15s);
+}
+
+.experience-item.is-education .experience-rail::after {
+  background: var(--bg);
+}
+
+@keyframes rail-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes rail-mark {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .experience-item,
+  .experience-item:first-child,
+  .experience-item:last-child {
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    grid-template-areas:
+      "rail dates"
+      "rail body";
+    gap: 4px 12px;
+  }
+  .experience-dates {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience-rail::before,
+  .experience-rail::after {
+    animation: none;
+  }
+}
