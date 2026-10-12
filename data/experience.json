@@ -6,14 +6,12 @@
       "location": "Remote",
       "start": "Nov 2024",
       "end": "Present",
-      "description": "Lead a team of 7 engineers on ChatLLM's core agentic infrastructure, serving 400k+ users: architected a task-classified model router across OpenAI, Anthropic, and Gemini (45% fewer LLM calls per turn), shipped the chat-to-agent hand-off now routing 31k conversations a week, and cut input-token spend by ~$1.5M a year through prompt caching. Also launched two 0-to-1 verticals: Health Expert, a mobile-first wearables product with full iOS and Android clients that reached 1,000 connected users in two weeks, and Role Play, an AI character chat product whose dedicated stack cut cost per reply by over 90%.",
+      "description": "I lead the team behind ChatLLM's core agentic platform: the layer that decides which model and workflow each request should go to, and gives agents the tools to do real work like writing documents and editing code. Along the way I've taken a couple of ideas from zero to launch, including a health companion that connects to your wearables and an AI character chat product. Mostly I like finding what people are already trying to do and building the thing that does it well.",
       "tags": [
         "AI Agents",
-        "Model Routing",
-        "Prompt Caching",
-        "iOS",
-        "Android",
-        "0-to-1 Product",
+        "Multi-LLM Systems",
+        "0-to-1 Products",
+        "Mobile",
         "Team Lead"
       ]
     },
@@ -23,10 +21,10 @@
       "location": "Philadelphia, PA",
       "start": "Jan 2024",
       "end": "May 2024",
-      "description": "Built automation workflows using OCR, PDF parsing, and deterministic similarity scoring to generate manufacturer sales quotes from unstructured documents and images. Designed a dogfood data pipeline to measure LLM accuracy on inventory translation against real orders.",
+      "description": "First engineer at an early-stage startup bringing AI to manufacturing sales. Built the workflows that turn messy documents and images into ready-to-send quotes, and the tooling to check how well the models were actually doing.",
       "tags": [
-        "OCR",
-        "Document Parsing",
+        "Startups",
+        "Document AI",
         "LLM Evals"
       ]
     }
