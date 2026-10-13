@@ -73,7 +73,9 @@ export default {
       const authorizeUrl = new URL(GITHUB_AUTHORIZE_URL);
       authorizeUrl.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
       authorizeUrl.searchParams.set("redirect_uri", `${url.origin}/callback`);
-      authorizeUrl.searchParams.set("scope", "repo user");
+      // public_repo is all the admin panel needs (commits to this public
+      // repo). "repo" would also hand out every private repo.
+      authorizeUrl.searchParams.set("scope", "public_repo");
       authorizeUrl.searchParams.set("state", state);
 
       return new Response(null, {
@@ -112,8 +114,9 @@ export default {
       const tokenData = await tokenRes.json();
 
       if (!tokenData.access_token) {
+        const reason = String(tokenData.error_description || "no token returned").replace(/[<>&"']/g, "");
         return html(
-          `<p>Auth failed: ${tokenData.error_description || "no token returned"}.</p><p><a href="#" onclick="window.close();return false;">Close window</a></p>`
+          `<p>Auth failed: ${reason}.</p><p><a href="#" onclick="window.close();return false;">Close window</a></p>`
         );
       }
 
@@ -122,15 +125,20 @@ export default {
         provider: "github",
       })}`;
 
+      // The token is only ever posted to the site itself. Replying to
+      // whichever origin opened this popup (e.origin) would let any page
+      // open /auth and be handed a token for an already-authorized user.
       const script = `<!doctype html><html><body><script>
         (function() {
+          var allowed = ${JSON.stringify(ALLOWED_ORIGIN)};
           function receiveMessage(e) {
-            window.opener.postMessage(${JSON.stringify(message)}, e.origin);
+            if (e.origin !== allowed) return;
+            window.opener.postMessage(${JSON.stringify(message)}, allowed);
             window.removeEventListener("message", receiveMessage, false);
             window.close();
           }
           window.addEventListener("message", receiveMessage, false);
-          window.opener.postMessage("authorizing:github", "*");
+          window.opener.postMessage("authorizing:github", allowed);
         })();
       </script></body></html>`;
 

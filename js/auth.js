@@ -1,5 +1,6 @@
 const MarshuxAuth = (function () {
   const WORKER_URL = "https://marshux-cms-oauth.marshalx08.workers.dev";
+  const WORKER_ORIGIN = new URL(WORKER_URL).origin;
   const GITHUB_REPO = "marshux/marshux.github.io";
   const TOKEN_KEY = "marshux_admin_gh_token";
 
@@ -24,8 +25,10 @@ const MarshuxAuth = (function () {
       }
 
       function handleMessage(e) {
+        // Only the OAuth popup, on the Worker's origin, may hand us a token.
+        if (e.origin !== WORKER_ORIGIN || e.source !== popup) return;
         if (e.data === "authorizing:github") {
-          popup.postMessage("authorizing:github", "*");
+          popup.postMessage("authorizing:github", WORKER_ORIGIN);
           return;
         }
         if (typeof e.data !== "string") return;
